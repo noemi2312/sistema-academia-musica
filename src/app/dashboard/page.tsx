@@ -2,10 +2,10 @@ import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { Navbar } from "@/components/ui/Navbar";
 import { DashboardCard } from "@/components/ui/DashboardCard";
-import { Container } from "@/components/ui/Layouts";
+import { Container, DashboardLayout } from "@/components/ui/Layouts";
 import { InfoBox } from "@/components/ui/InfoBox";
 import { TextSecondary, HighlightText } from "@/components/ui/Typography";
-import { PageLayout } from "@/components/ui/Layouts";
+import { Button } from "@/components/ui/Button";
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -14,22 +14,30 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
+  const isAdmin = session.user?.rol === "ADMIN";
+
   return (
-    <PageLayout>
+    <DashboardLayout>
       <Navbar userName={session.user?.name} />
 
       <Container>
-        <DashboardCard title="Bienvenido al Panel de Control">
+        <DashboardCard title="Panel de Control">
           <TextSecondary>
-            Estás conectado como: <HighlightText>{session.user?.email}</HighlightText>
+            Usuario: <HighlightText>{session.user?.email}</HighlightText>
           </TextSecondary>
           
-          <InfoBox>
-            <strong>Info de la Academia:</strong> Tu ID es {session.user?.academiaId}. 
-            Próximamente aquí podrás gestionar las salas.
-          </InfoBox>
+          {isAdmin ? (
+            <InfoBox>
+              Administrador de academia ID {session.user?.academiaId}
+              <Button>+ Agregar Nueva Sala</Button>
+            </InfoBox>
+          ) : (
+            <InfoBox>
+              Panel de Alumno
+            </InfoBox>
+          )}
         </DashboardCard>
       </Container>
-    </PageLayout>
+    </DashboardLayout>
   );
 }

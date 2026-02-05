@@ -1,30 +1,8 @@
 import NextAuth, { type DefaultSession } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { prisma } from "@/lib/prisma";
-import bcrypt from "bcryptjs"
-import type { JWT } from "next-auth/jwt";
+import bcrypt from "bcryptjs";
 
-// 1. Extendemos las interfaces de Auth.js
-declare module "next-auth" {
-  interface Session {
-    user: {
-      role?: string;
-      academiaId?: number;
-    } & DefaultSession["user"];
-  }
-
-  interface User {
-    role?: string;
-    academiaId?: number;
-  }
-}
-
-declare module "next-auth/jwt" {
-  interface JWT {
-    role?: string;
-    academiaId?: number;
-  }
-}
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
     Credentials({
@@ -36,15 +14,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
 
-        // Buscar al usuario en MySQL 
         const user = await prisma.usuario.findUnique({
           where: { email: credentials.email as string },
         });
 
-        // Si el usuario no existe o no tiene password, rebotar
         if (!user || !user.password) return null;
 
-        // Comparar contraseñas usando bcrypt (Punto 4.1)
         const isValid = await bcrypt.compare(
           credentials.password as string,
           user.password
@@ -52,13 +27,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
         if (!isValid) return null;
 
-        // Retornar el usuario para crear la sesión (JWT)
         return {
           id: user.id.toString(),
           name: user.nombre,
           email: user.email,
-          role: user.rol, 
-          academiaId: user.academiaId, // Para filtrar datos por academia
+          rol: user.rol, 
+          academiaId: user.academiaId,
         };
       },
     }),
@@ -66,22 +40,46 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.role = user.role;
+        token.rol = user.rol;
         token.academiaId = user.academiaId;
       }
       return token;
     },
     async session({ session, token }) {
-      // Agregamos "&& session.user" para asegurarnos de que el objeto exista
-      if (token && session.user) { 
-        session.user.role = token.role as string;
+      if (session.user) {
+        // Forzamos el tipado aquí para eliminar el error 'unknown'
+        session.user.rol = token.rol as string;
         session.user.academiaId = token.academiaId as number;
       }
       return session;
     },
   },
   pages: {
-    signIn: "/login", // Nuestra página personalizada de Login
+    signIn: "/login",
   },
-  session: { strategy: "jwt" }, // Requisito 4.1: Sesiones basadas en tokens
+  session: { strategy: "jwt" },
 });
+
+// DECLARACIÓN DE TIPOS AL FINAL (Ambient Types)
+// Esto soluciona el error 2664 de module not found
+declare module "next-auth" {
+  interface Session {
+    user: {
+      rol?: string;
+      academiaId?: number;
+    } & DefaultSession["user"];
+  }
+
+  interface User {
+    rol?: string;
+    academiaId?: number;
+  }
+}
+
+import "next-auth/jwt";
+declare module "next-auth/jwt" {
+  interface JWT {
+    rol?: string;
+    academiaId?: number;
+  }
+}
