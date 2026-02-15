@@ -51,3 +51,11 @@ export function AuthFooter({ children }: { children: React.ReactNode }) {
 export function Container({ children }: { children: React.ReactNode }) {
   return <main className="max-w-7xl mx-auto py-10 px-4 w-full">{children}</main>;
 }
+
+export function FormGroup({ children }: { children: React.ReactNode }) {
+  return <div className="mt-6 space-y-4">{children}</div>;
+}
+
+export function ActionGroup({ children }: { children: React.ReactNode }) {
+  return <div className="flex gap-4 mt-6">{children}</div>;
+}

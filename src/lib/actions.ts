@@ -35,3 +35,27 @@ export async function registrarAcademiaYAdmin(formData: FormData) {
 
   redirect("/login")
 }
+
+export async function crearRecurso(formData: FormData, academiaId: number) {
+  const nombre = formData.get("nombre") as string;
+  const tipo = formData.get("tipo") as string;
+
+  if (!nombre || !tipo) {
+    return { error: "El nombre y el tipo son obligatorios." };
+  }
+
+  try {
+    await prisma.recurso.create({
+      data: {
+        nombre: nombre,
+        tipo: tipo,
+        academiaId: academiaId,
+      },
+    });
+  } catch (err) {
+    console.error("Error al crear recurso:", err);
+    return { error: "No se pudo crear el recurso." };
+  }
+
+  redirect("/dashboard");
+}

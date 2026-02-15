@@ -16,3 +16,9 @@
   @apply bg-blue-600 hover:bg-blue-700 active:scale-[0.95];
   @apply disabled:opacity-70 disabled:cursor-not-allowed;
 }
+
+@utility btn-secondary {
+  @apply w-full rounded-md py-2 text-gray-700 font-semibold border border-gray-300 transition-all;
+  @apply bg-white hover:bg-gray-50 active:scale-[0.95];
+  @apply disabled:opacity-70 disabled:cursor-not-allowed;
+}

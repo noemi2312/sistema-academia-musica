@@ -2,10 +2,11 @@ import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { Navbar } from "@/components/ui/Navbar";
 import { DashboardCard } from "@/components/ui/DashboardCard";
-import { Container, DashboardLayout } from "@/components/ui/Layouts";
+import { Container, DashboardLayout, ActionGroup } from "@/components/ui/Layouts";
 import { InfoBox } from "@/components/ui/InfoBox";
 import { TextSecondary, HighlightText } from "@/components/ui/Typography";
 import { Button } from "@/components/ui/Button";
+import Link from "next/link";
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -25,11 +26,15 @@ export default async function DashboardPage() {
           <TextSecondary>
             Usuario: <HighlightText>{session.user?.email}</HighlightText>
           </TextSecondary>
-          
+
           {isAdmin ? (
             <InfoBox>
               Administrador de academia ID {session.user?.academiaId}
-              <Button>+ Agregar Nueva Sala</Button>
+              <ActionGroup>
+                <Link href="/dashboard/recursos/nuevo">
+                  <Button>+ Agregar Nueva Sala</Button>
+                </Link>
+              </ActionGroup>
             </InfoBox>
           ) : (
             <InfoBox>
