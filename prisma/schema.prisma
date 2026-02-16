@@ -32,6 +32,7 @@ model Recurso {
   id         Int      @id @default(autoincrement())
   nombre     String   
   tipo       String   // "SALA" o "INSTRUMENTO"
+  capacidad   Int      @default(0)
   academiaId Int
   academia   Academia @relation(fields: [academiaId], references: [id])
   reservas   Reserva[]

@@ -1,19 +1,24 @@
 import React from "react";
 
-// Agregamos variant a la interfaz
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   isLoading?: boolean;
-  variant?: "primary" | "secondary"; // Definimos los tipos permitidos
+  variant?: "primary" | "secondary" | "danger";
+  children: React.ReactNode;
 }
 
 export function Button({ isLoading, variant = "primary", children, ...props }: ButtonProps) {
-  const variantClass = variant === "secondary" ? "btn-secondary" : "btn-academia";
+  // Mapeamos la variante a la clase de CSS correspondiente
+  const variants = {
+    primary: "btn-academia",
+    secondary: "btn-secondary",
+    danger: "btn-danger",
+  };
 
   return (
     <button 
       {...props} 
       disabled={isLoading || props.disabled}
-      className={variantClass}
+      className={variants[variant]}
     >
       {isLoading ? "Cargando..." : children}
     </button>

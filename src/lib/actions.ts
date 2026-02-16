@@ -59,3 +59,31 @@ export async function crearRecurso(formData: FormData, academiaId: number) {
 
   redirect("/dashboard");
 }
+
+export async function eliminarRecurso(id: number) {
+  try {
+    await prisma.recurso.delete({
+      where: { id: id },
+    });
+    // Forzamos la actualización de la página para que desaparezca de la lista
+  } catch (err) {
+    console.error("Error al eliminar:", err);
+    return { error: "No se puede eliminar un recurso que tiene reservas asociadas." };
+  }
+}
+
+export async function editarRecurso(id: number, nombre: string, tipo: string, capacidad: number) {
+  try {
+    await prisma.recurso.update({
+      where: { id: id },
+      data: { 
+        nombre, 
+        tipo,
+        capacidad: Number(capacidad)
+      },
+    });
+  } catch (err) {
+    console.error("Error al editar:", err);
+    return { error: "No se pudo actualizar el recurso." };
+  }
+}
