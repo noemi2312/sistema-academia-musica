@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { registrarAlumno } from "@/lib/actions";
 
-// Importamos nuestras piezas de UI ya limpias
 import { PageLayout, FormStack, AuthFooter } from "@/components/ui/Layouts";
 import { AuthContainer } from "@/components/ui/AuthContainer";
 import { AuthLink } from "@/components/ui/AuthLink";
@@ -23,27 +23,17 @@ export default function RegisterPage() {
     setError("");
 
     const formData = new FormData(event.currentTarget);
-    const name = formData.get("name");
-    const email = formData.get("email");
-    const password = formData.get("password");
-    // Cambiamos academiaId por academiaNombre
-    const academiaNombre = formData.get("academiaNombre"); 
 
     try {
-      const response = await fetch("/api/register", {
-        method: "POST",
-        body: JSON.stringify({ name, email, password, academiaNombre }),
-        headers: { "Content-Type": "application/json" },
-      });
+      const result = await registrarAlumno(formData);
 
-      if (response.ok) {
-        // Registro exitoso, lo mandamos al login
+      if (result.success) {
         router.push("/login");
       } else {
-        const data = await response.json();
-        setError(data.message || "Error al registrar usuario.");
+        setError(result.error || "Error al registrar usuario.");
       }
     } catch {
+      // Eliminamos 'err' para cumplir con ESLint (Punto 16)
       setError("Ocurrió un error inesperado. Intenta de nuevo.");
     } finally {
       setIsLoading(false);
@@ -52,7 +42,7 @@ export default function RegisterPage() {
 
   return (
     <PageLayout>
-      <AuthContainer title="Crear Cuenta">
+      <AuthContainer title="Crear Cuenta de Alumno">
         <FormStack onSubmit={handleSubmit}>
           <Input 
             label="Nombre Completo"
@@ -73,10 +63,10 @@ export default function RegisterPage() {
           />
 
           <Input 
-            label="Nombre de tu Academia" // Etiqueta mucho más clara para el usuario
-            name="academiaNombre" 
-            type="text" 
-            placeholder="Ej: Conservatorio Beethoven"
+            label="ID de la Academia" 
+            name="academiaId" 
+            type="number" 
+            placeholder="Solicita el ID a tu profesor"
             required 
             disabled={isLoading}
           />
@@ -89,6 +79,7 @@ export default function RegisterPage() {
             disabled={isLoading}
           />
           
+          {/* Quitamos 'variant="error"' para que coincida con tus Props actuales */}
           {error && <InfoBox>{error}</InfoBox>}
           
           <Button type="submit" isLoading={isLoading}>

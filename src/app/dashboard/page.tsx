@@ -33,7 +33,6 @@ export default async function DashboardPage() {
 
       <Container>
         <DashboardCard title="Panel de Control">
-          {/* Usamos TextBold en lugar de <strong> para mantener el sistema de diseño */}
           <TextSecondary>
             Sesión iniciada como: <TextBold>{session.user?.email}</TextBold>
           </TextSecondary>
@@ -67,6 +66,7 @@ export default async function DashboardPage() {
                     nombre={recurso.nombre} 
                     tipo={recurso.tipo} 
                     capacidad={recurso.capacidad}
+                    isAdmin={isAdmin} // <--- Pasamos el rol aquí
                   />
                 ))}
               </Grid>

@@ -3,7 +3,12 @@
 import { prisma } from "./prisma"
 import bcrypt from "bcryptjs"
 import { redirect } from "next/navigation"
+import { revalidatePath } from "next/cache"
 
+/**
+ * REGISTRO: Crea una Academia nueva y su primer Administrador
+ * Requisito: Punto 4.1 y 14.7
+ */
 export async function registrarAcademiaYAdmin(formData: FormData) {
   const nombreAdmin = formData.get("nombreAdmin") as string
   const email = formData.get("email") as string
@@ -29,49 +34,75 @@ export async function registrarAcademiaYAdmin(formData: FormData) {
       })
     })
   } catch (err) { 
-    console.error("Error detallado:", err) 
+    console.error("Error en registro admin:", err) 
     return { error: "Hubo un fallo en el registro. Quizás el email ya existe." }
   }
 
   redirect("/login")
 }
 
-export async function crearRecurso(formData: FormData, academiaId: number) {
-  const nombre = formData.get("nombre") as string;
-  const tipo = formData.get("tipo") as string;
+/**
+ * REGISTRO: Crea un Alumno y lo vincula a una Academia existente
+ * Requisito: Punto 4.2 y 14.7
+ */
+export async function registrarAlumno(formData: FormData) {
+  const nombre = formData.get("name") as string
+  const email = formData.get("email") as string
+  const password = formData.get("password") as string
+  const academiaId = formData.get("academiaId") as string
 
-  if (!nombre || !tipo) {
-    return { error: "El nombre y el tipo son obligatorios." };
+  const hashedPassword = await bcrypt.hash(password, 10)
+
+  try {
+    await prisma.usuario.create({
+      data: {
+        nombre: nombre,
+        email: email,
+        password: hashedPassword,
+        rol: "USER", // Rol fijo para alumnos
+        academiaId: parseInt(academiaId)
+      }
+    })
+    return { success: true }
+  } catch (err) {
+    console.error("Error en registro alumno:", err)
+    return { error: "No se pudo completar el registro. Verifica el ID de la academia." }
   }
+}
+
+/**
+ * RECURSOS: Crear nuevo (Solo Admin)
+ * Requisito: Punto 3.1 y 11
+ */
+export async function crearRecurso(formData: FormData, academiaId: number) {
+  const nombre = formData.get("nombre") as string
+  const tipo = formData.get("tipo") as string
+  const capacidad = formData.get("capacidad") as string
+
+  if (!nombre || !tipo) return { error: "Campos obligatorios faltantes." }
 
   try {
     await prisma.recurso.create({
       data: {
         nombre: nombre,
         tipo: tipo,
+        capacidad: parseInt(capacidad) || 0,
         academiaId: academiaId,
       },
-    });
+    })
   } catch (err) {
-    console.error("Error al crear recurso:", err);
-    return { error: "No se pudo crear el recurso." };
+    console.error("Error al crear:", err)
+    return { error: "No se pudo crear el recurso." }
   }
 
-  redirect("/dashboard");
+  revalidatePath("/dashboard")
+  redirect("/dashboard")
 }
 
-export async function eliminarRecurso(id: number) {
-  try {
-    await prisma.recurso.delete({
-      where: { id: id },
-    });
-    // Forzamos la actualización de la página para que desaparezca de la lista
-  } catch (err) {
-    console.error("Error al eliminar:", err);
-    return { error: "No se puede eliminar un recurso que tiene reservas asociadas." };
-  }
-}
-
+/**
+ * RECURSOS: Editar existente
+ * Requisito: Punto 3.1
+ */
 export async function editarRecurso(id: number, nombre: string, tipo: string, capacidad: number) {
   try {
     await prisma.recurso.update({
@@ -81,9 +112,26 @@ export async function editarRecurso(id: number, nombre: string, tipo: string, ca
         tipo,
         capacidad: Number(capacidad)
       },
-    });
+    })
+    revalidatePath("/dashboard")
   } catch (err) {
-    console.error("Error al editar:", err);
-    return { error: "No se pudo actualizar el recurso." };
+    console.error("Error al editar:", err)
+    return { error: "No se pudo actualizar el recurso." }
+  }
+}
+
+/**
+ * RECURSOS: Eliminar
+ * Requisito: Punto 3.1
+ */
+export async function eliminarRecurso(id: number) {
+  try {
+    await prisma.recurso.delete({
+      where: { id: id },
+    })
+    revalidatePath("/dashboard")
+  } catch (err) {
+    console.error("Error al eliminar:", err)
+    return { error: "Error al borrar. Puede tener reservas activas." }
   }
 }

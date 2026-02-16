@@ -1,6 +1,6 @@
 "use client";
 
-import { useSession } from "next-auth/react"; // Hook para el cliente
+import { useSession } from "next-auth/react"; 
 import { Container, DashboardLayout, ActionGroup, FormGroup } from "@/components/ui/Layouts";
 import { DashboardCard } from "@/components/ui/DashboardCard";
 import { Button } from "@/components/ui/Button";
@@ -8,32 +8,55 @@ import { Input } from "@/components/ui/Input";
 import { TextSecondary } from "@/components/ui/Typography";
 import { useRouter } from "next/navigation";
 import { crearRecurso } from "@/lib/actions";
+import { useEffect } from "react";
 
 export default function NuevoRecursoPage() {
   const router = useRouter();
-  const { data: session } = useSession(); // Obtenemos la sesión en el cliente
-  
+  const { data: session, status } = useSession();
+
+  // EFECTO DE SEGURIDAD: Si no es ADMIN, fuera de aquí
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/login");
+    } else if (status === "authenticated" && session?.user?.rol !== "ADMIN") {
+      // Si está logueado pero es Alumno, lo mandamos al dashboard
+      router.push("/dashboard");
+    }
+  }, [session, status, router]);
+
   const handleAction = async (formData: FormData) => {
     const academiaId = session?.user?.academiaId;
 
     if (!academiaId) {
-      alert("Error: No se pudo identificar la academia. Reintenta loguearte.");
+      alert("Error: No se pudo identificar la academia.");
       return;
     }
 
-    // Ejecutamos la acción
     const resultado = await crearRecurso(formData, academiaId);
 
-    // Si la acción devuelve un error, lo mostramos
     if (resultado?.error) {
       alert(resultado.error);
     } else {
-      // Si todo salió bien, la acción misma debería redirigir, 
-      // pero forzamos la vuelta al dashboard aquí por seguridad.
       router.push("/dashboard");
-      router.refresh(); // Refrescamos para ver los cambios
+      router.refresh();
     }
   };
+
+  // Mientras verifica la sesión, mostramos un estado de carga "Zen"
+  if (status === "loading") {
+    return (
+      <DashboardLayout>
+        <Container>
+          <TextSecondary>Verificando permisos...</TextSecondary>
+        </Container>
+      </DashboardLayout>
+    );
+  }
+
+  // Si no es admin, no renderizamos el formulario para evitar "flasheos" de UI
+  if (session?.user?.rol !== "ADMIN") {
+    return null;
+  }
 
   return (
     <DashboardLayout>
