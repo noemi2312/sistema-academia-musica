@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma"; // Asegurate de que esta ruta sea correcta
+import { prisma } from "@/lib/prisma"; 
 import bcrypt from "bcryptjs";
+import { Role } from "@prisma/client";
 
 export async function POST(req: Request) {
   try {
@@ -22,14 +23,15 @@ export async function POST(req: Request) {
       where: { nombre: academiaNombre }
     });
 
-    let rolAsignado = "ALUMNO";
+    // Definimos el rol con el tipo correcto desde el inicio
+    let rolAsignado: Role = Role.ALUMNO;
 
     if (!academia) {
-      // Si no existe, la creamos y el usuario será ADMIN
+      // Si no existe la academia, la creamos y el primer usuario es ADMIN
       academia = await prisma.academia.create({
         data: { nombre: academiaNombre }
       });
-      rolAsignado = "ADMIN";
+      rolAsignado = Role.ADMIN;
     }
 
     // 4. Encriptar contraseña
@@ -41,12 +43,12 @@ export async function POST(req: Request) {
         nombre: name,
         email: email,
         password: hashedPassword,
-        rol: rolAsignado,
-        academiaId: academia.id, // Aquí usamos el ID generado o encontrado
+        rol: rolAsignado, // Ahora rolAsignado es de tipo Role
+        academiaId: academia.id, 
       },
     });
 
-    return NextResponse.json({ message: "Usuario creado con éxito", user: newUser }, { status: 201 });
+    return NextResponse.json({ message: "Usuario creado con éxito", user: { email: newUser.email, nombre: newUser.nombre } }, { status: 201 });
 
   } catch (error) {
     console.error("Error en el registro:", error);
