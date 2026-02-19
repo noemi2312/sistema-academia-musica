@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { registrarAcademiaYAdmin } from "@/lib/actions";
-
-import { PageLayout, FormStack, AuthFooter, AuthHeader } from "@/components/ui/Layouts";
+// Importamos los nombres unificados
+import { DashboardLayout, FormGroup } from "@/components/ui/Layouts";
 import { AuthContainer } from "@/components/ui/AuthContainer";
 import { AuthLink } from "@/components/ui/AuthLink";
 import { Input } from "@/components/ui/Input";
@@ -23,9 +23,7 @@ export default function RegisterAdminPage() {
     const formData = new FormData(event.currentTarget);
 
     try {
-      // Esta acción crea la Academia y el Admin en una sola transacción
       const result = await registrarAcademiaYAdmin(formData);
-
       if (result?.error) {
         setError(result.error);
         setIsLoading(false);
@@ -37,61 +35,63 @@ export default function RegisterAdminPage() {
   }
 
   return (
-    <PageLayout>
+    <DashboardLayout>
       <AuthContainer title="Registrar Mi Academia">
-        <AuthHeader>
+        <FormGroup>
           <TextSecondary>
             Crea una cuenta de administrador para gestionar tus recursos y alumnos.
           </TextSecondary>
-        </AuthHeader>
+        </FormGroup>
         
-        <FormStack onSubmit={handleSubmit}>
-          <Input 
-            label="Nombre de la Academia"
-            name="nombreAcademia" 
-            placeholder="Ej: Academia de Música Mozart"
-            required 
-            disabled={isLoading}
-          />
+        <FormGroup>
+          <form onSubmit={handleSubmit} className="w-full space-y-6">
+            <Input 
+              label="Nombre de la Academia"
+              name="nombreAcademia" 
+              placeholder="Ej: Academia de Música Mozart"
+              required 
+              disabled={isLoading}
+            />
 
-          <Input 
-            label="Tu Nombre (Admin)"
-            name="nombreAdmin" 
-            placeholder="Ej: Juan Pérez"
-            required 
-            disabled={isLoading}
-          />
+            <Input 
+              label="Tu Nombre (Admin)"
+              name="nombreAdmin" 
+              placeholder="Ej: Juan Pérez"
+              required 
+              disabled={isLoading}
+            />
 
-          <Input 
-            label="Email Profesional"
-            name="email" 
-            type="email" 
-            required 
-            disabled={isLoading}
-          />
+            <Input 
+              label="Email Profesional"
+              name="email" 
+              type="email" 
+              required 
+              disabled={isLoading}
+            />
 
-          <Input 
-            label="Contraseña"
-            name="password" 
-            type="password" 
-            required 
-            disabled={isLoading}
-          />
-          
-          {error && <InfoBox>{error}</InfoBox>}
-          
-          <Button type="submit" isLoading={isLoading}>
-            Crear Academia y Admin
-          </Button>
-        </FormStack>
+            <Input 
+              label="Contraseña"
+              name="password" 
+              type="password" 
+              required 
+              disabled={isLoading}
+            />
+            
+            {error && <InfoBox>{error}</InfoBox>}
+            
+            <Button type="submit" isLoading={isLoading} className="w-full">
+              Crear Academia y Admin
+            </Button>
+          </form>
+        </FormGroup>
         
-        <AuthFooter>
+        <FormGroup>
           <TextSecondary>
             ¿Eres un alumno con ID?{" "}
             <AuthLink href="/registro">Regístrate como alumno aquí</AuthLink>
           </TextSecondary>
-        </AuthFooter>
+        </FormGroup>
       </AuthContainer>
-    </PageLayout>
+    </DashboardLayout>
   );
 }

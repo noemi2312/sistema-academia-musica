@@ -24,17 +24,31 @@ export default function NuevoRecursoPage() {
 
   async function handleAction(formData: FormData) {
     const academiaId = session?.user?.academiaId;
-    if (!academiaId) {
-      toast.error("Error de academia");
+    const nombre = formData.get("nombre") as string;
+    const capacidad = Number(formData.get("capacidad"));
+
+    // 1. Validaciones manuales para evitar datos vacíos o inconsistentes
+    if (!nombre || nombre.trim().length === 0) {
+      toast.error("El nombre del recurso es obligatorio");
       return;
     }
 
+    if (capacidad < 1) {
+      toast.error("La capacidad mínima debe ser de 1 persona");
+      return;
+    }
+
+    if (!academiaId) {
+      toast.error("Error: No se pudo identificar la academia");
+      return;
+    }
+
+    // 2. Si pasa las validaciones, procedemos a crear
     const resultado = await crearRecurso(formData, academiaId);
     
     if (resultado?.error) {
       toast.error(resultado.error);
     } else {
-      // Feedback visual antes de la redirección
       toast.success("¡Recurso creado con éxito!");
       router.push("/dashboard");
       router.refresh();
@@ -59,7 +73,16 @@ export default function NuevoRecursoPage() {
           <form action={handleAction}>
             <FormGroup>
               <TextSecondary>Ingresa los detalles para tu academia.</TextSecondary>
-              <Input name="nombre" label="Nombre del Recurso" placeholder="Ej: Sala de Piano A" required />
+              
+              {/* 'required' y 'minLength' activan la validación nativa del navegador */}
+              <Input 
+                name="nombre" 
+                label="Nombre del Recurso" 
+                placeholder="Ej: Sala de Piano A" 
+                required 
+                minLength={2}
+              />
+              
               <Select 
                 label="Tipo de Recurso"
                 name="tipo"
@@ -70,11 +93,21 @@ export default function NuevoRecursoPage() {
                   { value: "INSTRUMENTO", label: "Instrumento" },
                 ]}
               />
-              <Input name="capacidad" label="Capacidad Máxima" type="number" min="1" required />
+              
+              {/* 'min="1"' evita que el usuario baje de 1 con las flechitas del input */}
+              <Input 
+                name="capacidad" 
+                label="Capacidad Máxima" 
+                type="number" 
+                min="1" 
+                required 
+              />
+              
               <TextSecondary>
                 <TextBold>Nota:</TextBold> Para instrumentos, se recomienda asignar capacidad 1.
               </TextSecondary>
             </FormGroup>
+
             <ActionGroup>
               <Button type="submit">Guardar Recurso</Button>
               <Button type="button" variant="secondary" onClick={() => router.back()}>

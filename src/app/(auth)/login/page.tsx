@@ -4,7 +4,8 @@ import { signIn } from "next-auth/react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { PageLayout, FormStack, AuthFooter } from "@/components/ui/Layouts";
+// Nombres actualizados para coincidir con Layouts.tsx
+import { DashboardLayout, FormGroup } from "@/components/ui/Layouts";
 import { AuthContainer } from "@/components/ui/AuthContainer";
 import { AuthLink } from "@/components/ui/AuthLink";
 import { Input } from "@/components/ui/Input";
@@ -42,39 +43,42 @@ export default function LoginPage() {
   }
 
   return (
-    <PageLayout>
+    <DashboardLayout>
       <AuthContainer title="Iniciar Sesión">
-        <FormStack onSubmit={handleSubmit}>
-          <Input 
-            label="Email"
-            name="email" 
-            type="email" 
-            required 
-            disabled={isLoading}
-          />
+        <FormGroup>
+          {/* El formulario ahora usa un tag nativo con los estilos del FormGroup */}
+          <form onSubmit={handleSubmit} className="w-full space-y-6">
+            <Input 
+              label="Email"
+              name="email" 
+              type="email" 
+              required 
+              disabled={isLoading}
+            />
 
-          <Input 
-            label="Contraseña"
-            name="password" 
-            type="password" 
-            required 
-            disabled={isLoading}
-          />
-          
-          {error && <InfoBox>{error}</InfoBox>}
-          
-          <Button type="submit" isLoading={isLoading}>
-            Entrar
-          </Button>
-        </FormStack>
+            <Input 
+              label="Contraseña"
+              name="password" 
+              type="password" 
+              required 
+              disabled={isLoading}
+            />
+            
+            {error && <InfoBox>{error}</InfoBox>}
+            
+            <Button type="submit" isLoading={isLoading} className="w-full">
+              Entrar
+            </Button>
+          </form>
+        </FormGroup>
         
-        <AuthFooter>
+        <FormGroup>
           <TextSecondary>
             ¿No tienes una cuenta?{" "}
             <AuthLink href="/registro">Regístrate aquí</AuthLink>
           </TextSecondary>
-        </AuthFooter>
+        </FormGroup>
       </AuthContainer>
-    </PageLayout>
+    </DashboardLayout>
   );
 }

@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { Navbar } from "@/components/features/Navbar";
 import { DashboardCard } from "@/components/features/DashboardCard";
-import { Container, DashboardLayout, ActionGroup, FormGroup, Grid } from "@/components/ui/Layouts";
+import { Container, DashboardLayout, FormGroup, Grid, GroupTitle, Section } from "@/components/ui/Layouts";
 import { TextSecondary, TitleSection, TextBold } from "@/components/ui/Typography";
 import { Button } from "@/components/ui/Button";
 import { RecursoCard } from "@/components/features/RecursoCard";
@@ -22,7 +22,7 @@ export default async function DashboardPage() {
   const usuarioId = session.user?.id ? Number(session.user.id) : undefined;
   const academiaId = Number(session.user?.academiaId);
 
-  // Carga de datos en paralelo para optimizar rendimiento
+  // Carga de datos
   const [recursos, reservas] = await Promise.all([
     prisma.recurso.findMany({
       where: { academiaId: academiaId },
@@ -31,7 +31,7 @@ export default async function DashboardPage() {
     isAdmin ? obtenerReservasAcademia(academiaId) : Promise.resolve([])
   ]);
 
-  // Lógica funcional: Agrupar recursos por tipo para mejorar la navegación
+  // Agrupamiento por tipo
   const tipos = ["AULA", "CABINA", "INSTRUMENTO"];
   const recursosAgrupados = tipos.map(tipo => ({
     tipo,
@@ -43,72 +43,64 @@ export default async function DashboardPage() {
       <Navbar userName={session.user?.name} rol={session.user?.rol} />
 
       <Container>
-        <DashboardCard title="Panel de Control">
-          <FormGroup>
+        {/* Cabecera centrada */}
+        <FormGroup>
+          <TitleSection>Panel de Control</TitleSection>
+          <TextSecondary>
+            Sesión iniciada: <TextBold>{session.user?.email}</TextBold>
+          </TextSecondary>
+          
+          {/* Muestra el ID de la academia solo para Administradores */}
+          {isAdmin && (
             <TextSecondary>
-              Sesión iniciada: <TextBold>{session.user?.email}</TextBold>
+              ID de Academia: <TextBold>{academiaId}</TextBold>
             </TextSecondary>
-          </FormGroup>
-
-          {isAdmin ? (
-            <FormGroup>
-              <TextBold>Gestión Institucional</TextBold>
-              <ActionGroup>
-                <Link href="/dashboard/recursos/nuevo">
-                  <Button variant="primary">Nuevo Recurso</Button>
-                </Link>
-              </ActionGroup>
-            </FormGroup>
-          ) : (
-            <FormGroup>
-              <TextBold>Portal de Alumno</TextBold>
-              <TextSecondary>Explora los recursos y gestiona tus turnos disponibles.</TextSecondary>
-            </FormGroup>
           )}
-
-          <FormGroup>
-            <TitleSection>Recursos Disponibles</TitleSection>
-            
-            {recursos.length === 0 ? (
-              <TextSecondary>No se encontraron registros en esta academia actualmente.</TextSecondary>
-            ) : (
-              /* Mapeo funcional utilizando tus componentes de estructura */
-              recursosAgrupados.map((grupo) => (
-                <FormGroup key={grupo.tipo}>
-                  <TextBold>{grupo.tipo}S</TextBold>
-                  <Grid>
-                    {grupo.items.map((recurso) => (
-                      <RecursoCard 
-                        key={recurso.id}
-                        id={recurso.id} 
-                        nombre={recurso.nombre} 
-                        tipo={recurso.tipo} 
-                        capacidad={recurso.capacidad}
-                        isAdmin={isAdmin}
-                        usuarioId={usuarioId}
-                        academiaId={academiaId}
-                      />
-                    ))}
-                  </Grid>
-                </FormGroup>
-              ))
-            )}
-          </FormGroup>
 
           {isAdmin && (
-            <FormGroup>
-              <TitleSection>Últimas Reservas</TitleSection>
-              {reservas.length === 0 ? (
-                <TextSecondary>No hay actividad de reservas registrada.</TextSecondary>
-              ) : (
-                <FormGroup>
-                  <TextSecondary>Vistazo rápido a los movimientos recientes:</TextSecondary>
-                  <ReservaListaAdmin reservas={reservas.slice(0, 3)} />
-                </FormGroup>
-              )}
-            </FormGroup>
+            <Link href="/dashboard/recursos/nuevo">
+              <Button variant="primary">Nuevo Recurso</Button>
+            </Link>
           )}
-        </DashboardCard>
+        </FormGroup>
+
+        {/* Listado de Recursos: Ocupando el ancho total */}
+        <div className="w-full">
+          {recursos.length === 0 ? (
+            <FormGroup>
+              <TextSecondary>No se encontraron registros en esta academia actualmente.</TextSecondary>
+            </FormGroup>
+          ) : (
+            recursosAgrupados.map((grupo) => (
+              <Section key={grupo.tipo}>
+                <GroupTitle>{grupo.tipo}S</GroupTitle>
+                <Grid>
+                  {grupo.items.map((recurso) => (
+                    <RecursoCard 
+                      key={recurso.id}
+                      id={recurso.id} 
+                      nombre={recurso.nombre} 
+                      tipo={recurso.tipo} 
+                      capacidad={recurso.capacidad}
+                      isAdmin={isAdmin}
+                      usuarioId={usuarioId}
+                      academiaId={academiaId}
+                    />
+                  ))}
+                </Grid>
+              </Section>
+            ))
+          )}
+        </div>
+
+        {/* Reservas destacadas en tarjeta blanca */}
+        {isAdmin && reservas.length > 0 && (
+          <Section>
+            <DashboardCard title="Últimas Reservas">
+              <ReservaListaAdmin reservas={reservas.slice(0, 5)} />
+            </DashboardCard>
+          </Section>
+        )}
       </Container>
     </DashboardLayout>
   );

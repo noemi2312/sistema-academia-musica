@@ -1,6 +1,5 @@
 import React from "react";
 
-// Definimos la interfaz que TypeScript reclamaba
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label: string;
 }

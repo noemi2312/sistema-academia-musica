@@ -1,10 +1,10 @@
-//registro alumno
 "use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { registrarAlumno } from "@/lib/actions";
-import { PageLayout, FormStack, AuthFooter, AuthHeader } from "@/components/ui/Layouts";
+// Importamos los nombres correctos del Layouts.tsx
+import { DashboardLayout, FormGroup } from "@/components/ui/Layouts";
 import { AuthContainer } from "@/components/ui/AuthContainer";
 import { AuthLink } from "@/components/ui/AuthLink";
 import { Input } from "@/components/ui/Input";
@@ -40,65 +40,67 @@ export default function RegisterPage() {
   }
 
   return (
-    <PageLayout>
+    <DashboardLayout>
       <AuthContainer title="Crear Cuenta de Alumno">
-        {/* Agregamos el header informativo para dar aire al diseño */}
-        <AuthHeader>
+        {/* Usamos FormGroup para el texto informativo superior */}
+        <FormGroup>
           <TextSecondary>
             Ingresa tus datos y el ID proporcionado por tu institución para comenzar.
           </TextSecondary>
-        </AuthHeader>
+        </FormGroup>
 
-        <FormStack onSubmit={handleSubmit}>
-          <Input 
-            label="Nombre Completo"
-            name="name" 
-            type="text" 
-            placeholder="Ej: Ana García"
-            required 
-            disabled={isLoading}
-          />
+        <FormGroup>
+          <form onSubmit={handleSubmit} className="w-full space-y-6">
+            <Input 
+              label="Nombre Completo"
+              name="name" 
+              type="text" 
+              placeholder="Ej: Ana García"
+              required 
+              disabled={isLoading}
+            />
 
-          <Input 
-            label="Email"
-            name="email" 
-            type="email" 
-            placeholder="tu@email.com"
-            required 
-            disabled={isLoading}
-          />
+            <Input 
+              label="Email"
+              name="email" 
+              type="email" 
+              placeholder="tu@email.com"
+              required 
+              disabled={isLoading}
+            />
 
-          <Input 
-            label="ID de la Academia" 
-            name="academiaId" 
-            type="number" 
-            placeholder="Solicita el ID a tu profesor"
-            required 
-            disabled={isLoading}
-          />
+            <Input 
+              label="ID de la Academia" 
+              name="academiaId" 
+              type="number" 
+              placeholder="Solicita el ID a tu profesor"
+              required 
+              disabled={isLoading}
+            />
 
-          <Input 
-            label="Contraseña"
-            name="password" 
-            type="password" 
-            required 
-            disabled={isLoading}
-          />
-          
-          {error && <InfoBox>{error}</InfoBox>}
-          
-          <Button type="submit" isLoading={isLoading}>
-            Registrarse
-          </Button>
-        </FormStack>
+            <Input 
+              label="Contraseña"
+              name="password" 
+              type="password" 
+              required 
+              disabled={isLoading}
+            />
+            
+            {error && <InfoBox>{error}</InfoBox>}
+            
+            <Button type="submit" isLoading={isLoading} className="w-full">
+              Registrarse
+            </Button>
+          </form>
+        </FormGroup>
         
-        <AuthFooter>
+        <FormGroup>
           <TextSecondary>
             ¿Ya tienes una cuenta?{" "}
             <AuthLink href="/login">Inicia sesión aquí</AuthLink>
           </TextSecondary>
-        </AuthFooter>
+        </FormGroup>
       </AuthContainer>
-    </PageLayout>
+    </DashboardLayout>
   );
 }

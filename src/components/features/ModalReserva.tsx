@@ -27,21 +27,45 @@ export function ModalReserva({ recurso, usuarioId, academiaId, onClose }: ModalR
     setError("");
 
     const formData = new FormData(event.currentTarget);
+    const inicioStr = formData.get("inicio") as string;
+    const finStr = formData.get("fin") as string;
+
+    const inicio = new Date(inicioStr);
+    const fin = new Date(finStr);
+    const ahora = new Date();
+
+    // --- BLINDAJE EN EL CLIENTE ---
+    if (inicio < ahora) {
+      setError("No puedes realizar una reserva en una fecha u hora pasada.");
+      setIsLoading(false);
+      return;
+    }
+
+    if (inicio >= fin) {
+      setError("La hora de finalización debe ser posterior a la de inicio.");
+      setIsLoading(false);
+      return;
+    }
+
     formData.append("recursoId", recurso.id.toString());
 
+    // Llamada a la acción del servidor
     const result = await crearReserva(formData, usuarioId, academiaId);
 
-    if (result && "error" in result) {
+    // SOLUCIÓN AL ERROR DE TYPESCRIPT: 
+    // Usamos el operador 'in' para que TS identifique correctamente las propiedades.
+    if (result && 'error' in result) {
       setError(result.error);
-      toast.error("No se pudo completar la reserva"); // Feedback rápido
+      toast.error(result.error); 
       setIsLoading(false);
-    } else {
-      toast.success("¡Reserva realizada con éxito!"); // Reemplaza al alert
+    } else if (result && 'success' in result) {
+      toast.success("¡Reserva realizada con éxito!");
       onClose();
     }
   }
   
-  const ahora = new Date().toISOString().slice(0, 16);
+  // Mímimo permitido en el calendario (ahora mismo)
+  const ahoraString = new Date().toISOString().slice(0, 16);
 
   return (
     <Modal 
@@ -52,22 +76,24 @@ export function ModalReserva({ recurso, usuarioId, academiaId, onClose }: ModalR
       <form onSubmit={handleSubmit}>
         <FormGroup>
           <TextSecondary>
-            Selecciona el rango horario para tu reserva.
+            Seleccioná el rango horario para tu reserva de {recurso.nombre}.
           </TextSecondary>
 
           <Input 
-            label="Inicio" 
+            label="Fecha y Hora de Inicio" 
             name="inicio" 
             type="datetime-local" 
-            min={ahora} 
+            min={ahoraString} 
             required 
+            disabled={isLoading}
           />
           <Input 
-            label="Fin" 
+            label="Fecha y Hora de Fin" 
             name="fin" 
             type="datetime-local" 
-            min={ahora} 
+            min={ahoraString} 
             required 
+            disabled={isLoading}
           />
         </FormGroup>
 

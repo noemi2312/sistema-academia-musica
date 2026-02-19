@@ -1,27 +1,36 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primario: #2563eb;
-  --color-fondo: #f3f4f6;
+  /* Usamos los colores exactos de la UAP para que todo el sistema sea coherente */
+  --color-primario: #0D2C6B;  /* Azul UAP */
+  --color-dorado: #F4C430;    /* Dorado UAP */
+  --color-fondo: #f0f4f8;     /* El azul clarito que querías */
+}
+
+/* Aplicamos el fondo a toda la aplicación de una vez */
+@layer base {
+  body {
+    background-color: #f0f4f8 !important; /* El !important forzará el azul clarito */
+  }
 }
 
 @utility input-academia {
   @apply mt-1 w-full rounded-md border p-2 text-black outline-none transition-all;
-  @apply focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100;
+  @apply focus:ring-2 focus:ring-[#0D2C6B] disabled:bg-gray-100;
 }
 
 @utility btn-academia {
-  @apply w-full rounded-md py-2 text-white font-semibold transition-all;
-  @apply bg-blue-600 hover:bg-blue-700 active:scale-[0.95];
+  @apply w-full rounded-md py-2 text-white font-semibold transition-all shadow-sm;
+  @apply bg-[#0D2C6B] hover:bg-[#163a85] active:scale-[0.98];
   @apply disabled:opacity-70 disabled:cursor-not-allowed;
 }
 
 @utility btn-secondary {
-  @apply w-full rounded-md py-2 text-gray-700 font-semibold border border-gray-300 transition-all;
-  @apply bg-white hover:bg-gray-50 active:scale-[0.95];
+  @apply w-full rounded-md py-2 text-[#0D2C6B] font-semibold border border-[#F4C430] transition-all shadow-sm;
+  @apply bg-[#F4C430] hover:bg-[#e5b62d] active:scale-[0.98];
   @apply disabled:opacity-70 disabled:cursor-not-allowed;
 }
 
 @utility btn-danger {
-  @apply bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors font-medium;
+  @apply bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors font-medium shadow-sm;
 }

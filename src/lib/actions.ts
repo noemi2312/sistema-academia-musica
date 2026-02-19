@@ -1,9 +1,9 @@
 "use server"
 
 import { prisma } from "./prisma"
-import bcrypt from "bcryptjs"
 import { redirect } from "next/navigation"
 import { revalidatePath } from "next/cache"
+import bcrypt from "bcryptjs"
 
 /**
  * REGISTRO: Crea una Academia nueva y su primer Administrador
@@ -72,24 +72,26 @@ export async function registrarAlumno(formData: FormData) {
  * RECURSOS: Crear nuevo (Solo Admin)
  */
 export async function crearRecurso(formData: FormData, academiaId: number) {
-  const nombre = formData.get("nombre") as string
+  const nombre = (formData.get("nombre") as string)?.trim()
   const tipo = formData.get("tipo") as string
-  const capacidad = formData.get("capacidad") as string
+  const capacidad = parseInt(formData.get("capacidad") as string)
 
-  if (!nombre || !tipo) return { error: "Campos obligatorios faltantes." }
+  if (!nombre) return { error: "El nombre es obligatorio y no puede estar vacío." }
+  if (!tipo) return { error: "El tipo de recurso es obligatorio." }
+  if (isNaN(capacidad) || capacidad < 1) return { error: "La capacidad debe ser al menos 1." }
 
   try {
     await prisma.recurso.create({
       data: {
         nombre: nombre,
         tipo: tipo,
-        capacidad: parseInt(capacidad) || 0,
+        capacidad: capacidad,
         academiaId: academiaId,
       },
     })
     
     revalidatePath("/dashboard")
-    return { success: true } // Cambiado para permitir que el Toast se muestre antes de redirigir
+    return { success: true }
   } catch (err) {
     console.error("Error al crear:", err)
     return { error: "No se pudo crear el recurso." }
@@ -100,11 +102,16 @@ export async function crearRecurso(formData: FormData, academiaId: number) {
  * RECURSOS: Editar existente
  */
 export async function editarRecurso(id: number, nombre: string, tipo: string, capacidad: number) {
+  const nombreLimpio = nombre?.trim();
+
+  if (!nombreLimpio) return { error: "El nombre no puede quedar vacío." }
+  if (capacidad < 1) return { error: "La capacidad mínima es 1." }
+
   try {
     await prisma.recurso.update({
       where: { id: id },
       data: { 
-        nombre, 
+        nombre: nombreLimpio, 
         tipo,
         capacidad: Number(capacidad)
       },
@@ -134,7 +141,7 @@ export async function eliminarRecurso(id: number) {
 }
 
 /**
- * RESERVAS: Crear nueva con validación de disponibilidad
+ * RESERVAS: Crear nueva con blindaje total de disponibilidad
  */
 export async function crearReserva(formData: FormData, usuarioId: number, academiaId: number) {
   if (!usuarioId || usuarioId <= 0) {
@@ -150,17 +157,12 @@ export async function crearReserva(formData: FormData, usuarioId: number, academ
 
   try {
     return await prisma.$transaction(async (tx) => {
+      // BLINDAJE MATEMÁTICO: Detecta cualquier intersección de tiempo
       const conflicto = await tx.reserva.findFirst({
         where: {
           recursoId,
-          OR: [
-            {
-              AND: [
-                { inicio: { lt: fin } },
-                { fin: { gt: inicio } }
-              ]
-            }
-          ]
+          inicio: { lt: fin },
+          fin: { gt: inicio }
         }
       });
 

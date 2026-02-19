@@ -9,6 +9,7 @@ import { ModalEdicion } from "./ModalEdicion";
 import { ModalReserva } from "./ModalReserva"; 
 import { eliminarRecurso, editarRecurso } from "@/lib/actions";
 import { useRouter } from "next/navigation";
+import { toast } from "react-hot-toast";
 
 interface RecursoCardProps {
   id: number;
@@ -27,16 +28,32 @@ export function RecursoCard({ id, nombre, tipo, capacidad, isAdmin = false, usua
   const [isReservaOpen, setIsReservaOpen] = useState(false);
 
   const handleEliminar = async () => {
-    await eliminarRecurso(id);
-    setIsDeleteOpen(false);
-    router.refresh();
+    const resultado = await eliminarRecurso(id);
+    
+    if (resultado?.error) {
+      toast.error(resultado.error);
+    } else {
+      toast.success("Recurso eliminado");
+      setIsDeleteOpen(false);
+      router.refresh();
+    }
   };
 
   const handleEditar = async (nuevoNombre: string, nuevoTipo: string, nuevaCapacidad: number) => {
-    // Volvemos a la llamada simple con parámetros sueltos
-    await editarRecurso(id, nuevoNombre, nuevoTipo, nuevaCapacidad);
-    setIsEditOpen(false);
-    router.refresh();
+    const resultado = await editarRecurso(id, nuevoNombre, nuevoTipo, nuevaCapacidad);
+    
+    // Si hay error, mostramos el toast de error y salimos de la función
+    if (resultado?.error) {
+      toast.error(resultado.error);
+      return; 
+    }
+
+    // Solo si el servidor confirmó éxito, mostramos éxito y cerramos el modal
+    if (resultado?.success) {
+      toast.success("¡Cambios guardados!");
+      setIsEditOpen(false);
+      router.refresh();
+    }
   };
 
   return (

@@ -23,7 +23,7 @@ export function Navbar({ userName, rol }: NavbarProps) {
         </Link>
         {userName && (
           <TextSecondary>
-            Hola, {userName.split(" ")[0]} {/* Solo el primer nombre para que sea más limpio */}
+            Hola, {userName.split(" ")[0]} 
           </TextSecondary>
         )}
       </NavGroup>
@@ -53,7 +53,8 @@ export function Navbar({ userName, rol }: NavbarProps) {
         {userName && (
           <Button 
             variant="danger" 
-            onClick={() => signOut({ callbackUrl: "/login" })}
+            // CAMBIO CLAVE: callbackUrl ahora apunta a "/" para volver al landing
+            onClick={() => signOut({ callbackUrl: "/" })}
           >
             Cerrar Sesión
           </Button>

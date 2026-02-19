@@ -1,6 +1,6 @@
-import { Container, DashboardLayout, FormGroup } from "@/components/ui/Layouts";
+import { Container, DashboardLayout, FormGroup, LandingGrid } from "@/components/ui/Layouts";
 import { DashboardCard } from "@/components/features/DashboardCard";
-import { TitleSection, TextSecondary } from "@/components/ui/Typography";
+import { TitleMain, TextSecondary } from "@/components/ui/Typography"; 
 import { Button } from "@/components/ui/Button";
 import Link from "next/link";
 
@@ -8,47 +8,49 @@ export default function Home() {
   return (
     <DashboardLayout>
       <Container>
-        {/* Cabecera del sistema */}
         <FormGroup>
-          <TitleSection>Sistema de Gestión Academia</TitleSection>
+          <TitleMain>Sistema de Gestión Academia</TitleMain>
           <TextSecondary>
             Plataforma centralizada para la reserva de recursos y administración institucional.
           </TextSecondary>
         </FormGroup>
 
-        {/* Acceso Alumnos */}
-        <DashboardCard title="Área de Alumnos">
-          <FormGroup>
-            <TextSecondary>
-              Gestioná tus turnos y reservá instrumentos o equipos de estudio.
-            </TextSecondary>
-            <Link href="/login">
-              <Button variant="primary">Iniciar Sesión</Button>
-            </Link>
-            <Link href="/registro">
-              <Button variant="secondary">Crear Cuenta</Button>
-            </Link>
-          </FormGroup>
-        </DashboardCard>
+        <LandingGrid> 
+          <DashboardCard title="Área de Alumnos">
+            <FormGroup>
+              <TextSecondary>
+                Gestioná tus turnos y reservá instrumentos o equipos de estudio.
+              </TextSecondary>
+              
+              {/* Invertimos el orden: El Button es el hijo directo del FormGroup para que se centre solo */}
+              <Button variant="primary">
+                <Link href="/login">Iniciar Sesión</Link>
+              </Button>
 
-        {/* Acceso Instituciones / Admin */}
-        <DashboardCard title="Gestión Institucional">
-          <FormGroup>
-            <TextSecondary>
-              Accedé al panel de control de tu academia o registrá una nueva institución.
-            </TextSecondary>
-            {/* El Login es el mismo, pero el botón aquí guía al Admin */}
-            <Link href="/login">
-              <Button variant="primary">Acceso Administración</Button>
-            </Link>
-            <Link href="/registro/admin">
-              <Button variant="secondary">Registrar mi Academia</Button>
-            </Link>
-          </FormGroup>
-        </DashboardCard>
+              <Button variant="secondary">
+                <Link href="/registro">Crear Cuenta</Link>
+              </Button>
+            </FormGroup>
+          </DashboardCard>
 
-        {/* Footer integrado */}
-        <FormGroup>
+          <DashboardCard title="Gestión Institucional">
+            <FormGroup>
+              <TextSecondary>
+                Accedé al panel de control de tu academia o registrá una nueva institución.
+              </TextSecondary>
+              
+              <Button variant="primary">
+                <Link href="/login">Acceso Administración</Link>
+              </Button>
+
+              <Button variant="secondary">
+                <Link href="/registro/admin">Registrar mi Academia</Link>
+              </Button>
+            </FormGroup>
+          </DashboardCard>
+        </LandingGrid>
+
+        <FormGroup className="mt-12">
           <TextSecondary>
             Proyecto Final - Programación III
           </TextSecondary>

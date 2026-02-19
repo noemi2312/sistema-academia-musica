@@ -24,6 +24,10 @@ Se optó por **PostgreSQL** sobre soluciones NoSQL debido a la fuerte naturaleza
 - Hasheo de contraseñas mediante **BcryptJS**.
 - Middleware de protección de rutas privadas.
 
+### 🛡️ Lógica de Negocio Blindada
+- **Algoritmo de Colisiones**: Se implementó una lógica de intersección temporal en el servidor para evitar solapamientos de reservas. La consulta utiliza una validación matemática de intervalos (`inicio < fin_nuevo AND fin > inicio_nuevo`) dentro de una transacción de base de datos para garantizar la disponibilidad absoluta del recurso.
+- **Validaciones de Integridad en UI**: Los formularios de edición y reserva cuentan con "guardrails" en el cliente que impiden el envío de datos inconsistentes (ej. nombres vacíos o fechas pasadas), reduciendo la carga innecesaria en el servidor.
+
 ## 🧪 Testing
 El proyecto cuenta con unit tests para validar la lógica crítica de autorización.
 - Comando: `npm test`

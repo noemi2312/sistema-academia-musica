@@ -1,25 +1,30 @@
 import React from "react";
 
-// prop opcional para padding o altura
 interface CardProps {
   children: React.ReactNode;
-  className?: string; // ajustes estructurales mínimos
+  className?: string;
 }
 
 export function Card({ children, className = "" }: CardProps) {
   return (
-    <div className={`bg-white rounded-xl shadow-sm border border-gray-100 p-6 ${className}`}>
+    // Mantenemos tu diseño con el borde superior azul UAP
+    <div className={`bg-white rounded-xl shadow-md border border-gray-100 border-t-4 border-t-[#0D2C6B] p-6 transition-transform hover:shadow-lg ${className}`}>
       {children}
     </div>
   );
 }
 
-//título para paneles grandes
+/**
+ * Centramos el título de la tarjeta para que coincida con el resto del landing.
+ */
 export function CardTitle({ children }: { children: React.ReactNode }) {
-  return <h2 className="text-2xl font-bold text-gray-800 mb-6">{children}</h2>;
+  return (
+    <h2 className="text-2xl font-bold text-[#0D2C6B] mb-6 text-center w-full">
+      {children}
+    </h2>
+  );
 }
 
-//contenedor para separar el texto de los botones en tarjetas pequeñas
 export function CardContent({ children }: { children: React.ReactNode }) {
-  return <div className="mb-4 space-y-1">{children}</div>;
+  return <div className="mb-4 space-y-1 text-center">{children}</div>;
 }

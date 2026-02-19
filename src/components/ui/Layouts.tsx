@@ -1,69 +1,62 @@
 import React from "react";
 
-/**
- * 1. Para Login y Registro (Todo centrado en pantalla)
- */
-export function PageLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center items-center p-4">
-      {children}
-    </div>
-  );
-}
-
-/**
- * 2. Para el Dashboard (Contenido empieza arriba con scroll natural)
- */
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      {children}
-    </div>
-  );
+  return <div className="min-h-screen bg-[#F0F4F8] flex flex-col">{children}</div>;
 }
 
-/**
- * 3. Para apilar elementos con espacio (Formularios)
- */
-interface FormStackProps {
-  children: React.ReactNode;
-  onSubmit?: React.FormEventHandler<HTMLFormElement>;
-}
-
-export function FormStack({ children, onSubmit }: FormStackProps) {
-  return (
-    <form onSubmit={onSubmit} className="space-y-4">
-      {children}
-    </form>
-  );
-}
-
-/**
- * 4. Para centrar links de navegación al final de un cuadro
- */
-export function AuthFooter({ children }: { children: React.ReactNode }) {
-  return <div className="mt-4 text-center">{children}</div>;
-}
-
-/**
- * 5. Margen y ancho máximo para el Dashboard
- */
 export function Container({ children }: { children: React.ReactNode }) {
-  return <main className="max-w-7xl mx-auto py-10 px-4 w-full">{children}</main>;
-}
-
-export function FormGroup({ children }: { children: React.ReactNode }) {
-  return <div className="mt-6 space-y-4">{children}</div>;
-}
-
-export function ActionGroup({ children }: { children: React.ReactNode }) {
-  return <div className="flex gap-4 mt-6">{children}</div>;
+  return (
+    <main className="flex-grow w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex flex-col items-center">
+      {children}
+    </main>
+  );
 }
 
 export function Grid({ children, className = "" }: { children: React.ReactNode; className?: string }) {
-  return <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6 ${className}`}>{children}</div>;
+  return (
+    <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 w-full mt-6 ${className}`}>
+      {children}
+    </div>
+  );
 }
 
-export function AuthHeader({ children }: { children: React.ReactNode }) {
-  return <div className="mb-6 text-center">{children}</div>;
+export function GroupTitle({ children }: { children: React.ReactNode }) {
+  return (
+    <h3 className="text-xl font-bold text-[#0D2C6B] mb-6 block text-center border-b border-gray-200 pb-2 w-full">
+      {children}
+    </h3>
+  );
 }
+
+export function Section({ children }: { children: React.ReactNode }) {
+  return <section className="mb-16 w-full flex flex-col items-center">{children}</section>;
+}
+
+/**
+ * FormGroup: Ahora asegura que cualquier hijo (Link o Button) se centre automáticamente.
+ */
+export function FormGroup({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  return (
+    <div className={`space-y-6 flex flex-col items-center justify-center text-center w-full mb-10 ${className}`}>
+      {children}
+    </div>
+  );
+}
+
+export function ActionGroup({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="flex flex-wrap gap-4 mt-6 justify-center w-full">{children}</div>
+  );
+}
+
+export function LandingGrid({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-12 w-full max-w-5xl mt-12 mx-auto">
+      {children}
+    </div>
+  );
+}
+
+export const PageLayout = DashboardLayout;
+export const FormStack = FormGroup;
+export const AuthFooter = FormGroup;
