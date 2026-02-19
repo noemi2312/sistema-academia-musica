@@ -2,8 +2,10 @@ import NextAuth, { type DefaultSession } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
+import { authConfig } from "./auth.config"; //  base liviana
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  ...authConfig, // Expandir la configuración base
   providers: [
     Credentials({
       name: "Credentials",
@@ -38,6 +40,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
   ],
   callbacks: {
+    ...authConfig.callbacks, // callbacks del config
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id; 
@@ -55,11 +58,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       return session;
     },
   },
-  pages: {
-    signIn: "/login",
-  },
   session: { strategy: "jwt" },
 });
+
 
 declare module "next-auth" {
   interface Session {

@@ -1,21 +1,11 @@
-import { auth } from "@/auth"
+import NextAuth from "next-auth";
+import { authConfig } from "./auth.config";
 
-export default auth((req) => {
-  const { nextUrl } = req;
-  const isLoggedIn = !!req.auth;
+// motor de NextAuth con la configuración liviana
+export default NextAuth(authConfig).auth;
 
-  const isPrivateRoute = nextUrl.pathname.startsWith("/dashboard") || 
-                         nextUrl.pathname.startsWith("/reservas");
-  const isAuthRoute = nextUrl.pathname.startsWith("/login") || 
-                      nextUrl.pathname.startsWith("/register");
-
-  // Si es ruta privada y no está logueado -> al Login
-  if (isPrivateRoute && !isLoggedIn) {
-    return Response.redirect(new URL("/login", nextUrl));
-  }
-
-  // Si está logueado e intenta ir al login -> al Dashboard
-  if (isAuthRoute && isLoggedIn) {
-    return Response.redirect(new URL("/dashboard", nextUrl));
-  }
-})
+export const config = {
+  // Este matcher es VITAL para que el middleware no intente procesar
+  // archivos estáticos, lo que ayuda a reducir la carga de la Edge Function
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+};
