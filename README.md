@@ -32,6 +32,10 @@ Se optó por **PostgreSQL** sobre soluciones NoSQL debido a la fuerte naturaleza
 El proyecto cuenta con unit tests para validar la lógica crítica de autorización.
 - Comando: `npm test`
 
+## ☁️ Infraestructura y Despliegue
+- **Hosting**: El proyecto está desplegado en **Vercel**, aprovechando las **Edge Functions** para una baja latencia en la ejecución del Middleware de autenticación.
+- **Base de Datos**: Se utiliza **Neon (PostgreSQL)** en su modalidad Serverless. La conexión se realiza mediante un **Transaction Mode Pooler** para optimizar el manejo de sesiones concurrentes de Prisma en entornos de funciones efímeras.
+
 ## 🛠️ Instalación y Configuración
 1. Clonar el repositorio.
 2. Ejecutar `npm install`.
