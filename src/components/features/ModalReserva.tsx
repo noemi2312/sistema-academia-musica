@@ -35,36 +35,56 @@ export function ModalReserva({ recurso, usuarioId, academiaId, onClose }: ModalR
     const ahora = new Date();
 
     // --- BLINDAJE EN EL CLIENTE ---
+    
+    // 1. Validación: No reservar en el pasado
     if (inicio < ahora) {
       setError("No puedes realizar una reserva en una fecha u hora pasada.");
       setIsLoading(false);
       return;
     }
 
+    // 2. Validación: Orden cronológico
     if (inicio >= fin) {
       setError("La hora de finalización debe ser posterior a la de inicio.");
       setIsLoading(false);
       return;
     }
 
+    // 3. Validación: Máximo 40 minutos (Requisito de Progra 3)
+    const diferenciaMs = fin.getTime() - inicio.getTime();
+    const diferenciaMinutos = diferenciaMs / (1000 * 60);
+
+    if (diferenciaMinutos > 40) {
+      setError("La reserva no puede exceder los 40 minutos.");
+      setIsLoading(false);
+      return;
+    }
+
+    // Agregamos el ID del recurso al formData antes de enviarlo
     formData.append("recursoId", recurso.id.toString());
 
-    // Llamada a la acción del servidor
-    const result = await crearReserva(formData, usuarioId, academiaId);
+    try {
+      // Llamada a la acción del servidor
+      const result = await crearReserva(formData, usuarioId, academiaId);
 
-    // SOLUCIÓN AL ERROR DE TYPESCRIPT: 
-    // Usamos el operador 'in' para que TS identifique correctamente las propiedades.
-    if (result && 'error' in result) {
-      setError(result.error);
-      toast.error(result.error); 
+      // Manejo de respuesta del servidor con discriminación de tipos
+      if (result && 'error' in result) {
+        setError(result.error);
+        toast.error(result.error); 
+        setIsLoading(false);
+      } else if (result && 'success' in result) {
+        toast.success("¡Reserva realizada con éxito!");
+        onClose();
+      }
+    } catch (err) {
+      console.error("Error al intentar crear la reserva:", err);
+      setError("Ocurrió un error inesperado. Inténtalo de nuevo.");
+      toast.error("Error de conexión con el servidor.");
       setIsLoading(false);
-    } else if (result && 'success' in result) {
-      toast.success("¡Reserva realizada con éxito!");
-      onClose();
     }
   }
   
-  // Mímimo permitido en el calendario (ahora mismo)
+  // Mínimo permitido en el calendario (formato YYYY-MM-DDTHH:mm)
   const ahoraString = new Date().toISOString().slice(0, 16);
 
   return (
@@ -76,7 +96,8 @@ export function ModalReserva({ recurso, usuarioId, academiaId, onClose }: ModalR
       <form onSubmit={handleSubmit}>
         <FormGroup>
           <TextSecondary>
-            Seleccioná el rango horario para tu reserva de {recurso.nombre}.
+            Seleccioná el rango horario para tu reserva de <strong>{recurso.nombre}</strong>. 
+            Recordá que el tiempo máximo es de 40 minutos.
           </TextSecondary>
 
           <Input 

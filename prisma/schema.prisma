@@ -1,4 +1,4 @@
-// prisma/schema.prisma
+// sistema-academia/prisma/schema.prisma
 
 datasource db {
   provider = "postgresql"
@@ -9,32 +9,49 @@ generator client {
   provider = "prisma-client-js"
 }
 
+// Enums para asegurar consistencia en los datos
+enum Role {
+  ADMIN
+  ALUMNO
+}
+
+enum TipoRecurso {
+  AULA
+  CABINA
+  INSTRUMENTO
+}
+
+//Modelos
 model Academia {
-  id        Int      @id @default(autoincrement())
-  nombre    String
-  usuarios  Usuario[]
-  recursos  Recurso[]
-  reservas  Reserva[]
+  id       Int       @id @default(autoincrement())
+  nombre   String
+  usuarios Usuario[]
+  recursos Recurso[]
+  reservas Reserva[]
 }
 
 model Usuario {
   id         Int      @id @default(autoincrement())
   email      String   @unique
-  password   String   
+  password   String
   nombre     String
-  rol        String   // "ADMIN", "PROFE", "ALUMNO"
+  rol        Role     @default(ALUMNO)
+  
   academiaId Int
-  academia   Academia @relation(fields: [academiaId], references: [id])
+  academia   Academia @relation(fields: [academiaId], references: [id], onDelete: Cascade)
+  
   reservas   Reserva[]
 }
 
 model Recurso {
-  id         Int      @id @default(autoincrement())
-  nombre     String   
-  tipo       String   // "Aula", "cabina" o "INSTRUMENTO"
-  capacidad   Int      @default(0)
+  id         Int         @id @default(autoincrement())
+  nombre     String
+  tipo       TipoRecurso
+  capacidad  Int         @default(1)
+  
   academiaId Int
-  academia   Academia @relation(fields: [academiaId], references: [id])
+  academia   Academia    @relation(fields: [academiaId], references: [id], onDelete: Cascade)
+  
   reservas   Reserva[]
 }
 
@@ -42,19 +59,19 @@ model Reserva {
   id         Int      @id @default(autoincrement())
   inicio     DateTime
   fin        DateTime
-  createdAt  DateTime @default(now()) // Auditoría
+  createdAt  DateTime @default(now())
 
   usuarioId  Int
-  usuario    Usuario  @relation(fields: [usuarioId], references: [id])
+  usuario    Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
   
   recursoId  Int
-  recurso    Recurso  @relation(fields: [recursoId], references: [id])
+  recurso    Recurso  @relation(fields: [recursoId], references: [id], onDelete: Cascade)
   
   academiaId Int
-  academia   Academia @relation(fields: [academiaId], references: [id])
+  academia   Academia @relation(fields: [academiaId], references: [id], onDelete: Cascade)
 
-  // Índices para velocidad de consulta
-  @@index([recursoId])
+  // Índices para optimizar las búsquedas de disponibilidad
+  @@index([recursoId, inicio, fin])
   @@index([usuarioId])
   @@index([academiaId])
 }

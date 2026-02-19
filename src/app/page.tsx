@@ -9,7 +9,7 @@ export default function Home() {
     <DashboardLayout>
       <Container>
         <FormGroup>
-          <TitleMain>Sistema de Gestión Academia</TitleMain>
+          <TitleMain>Sistema de Gestión Academia Musical</TitleMain>
           <TextSecondary>
             Plataforma centralizada para la reserva de recursos y administración institucional.
           </TextSecondary>
@@ -22,7 +22,6 @@ export default function Home() {
                 Gestioná tus turnos y reservá instrumentos o equipos de estudio.
               </TextSecondary>
               
-              {/* Invertimos el orden: El Button es el hijo directo del FormGroup para que se centre solo */}
               <Button variant="primary">
                 <Link href="/login">Iniciar Sesión</Link>
               </Button>

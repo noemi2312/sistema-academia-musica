@@ -1,23 +1,16 @@
 import { describe, it, expect } from 'vitest';
+import { Role } from '@prisma/client'; 
 
-//verifica si un usuario tiene acceso administrativo
-const tieneAccesoAdmin = (user: { rol?: string }) => {
-  return user.rol === 'ADMIN' || user.rol === 'ACADEMIA';
+const tieneAccesoAdmin = (rol?: Role) => {
+  return rol === Role.ADMIN;
 };
 
-describe('Pruebas de Autorización', () => {
+describe('Pruebas de Autorización (Actualizadas)', () => {
   it('debería permitir el acceso si el usuario es ADMIN', () => {
-    const user = { rol: 'ADMIN' };
-    expect(tieneAccesoAdmin(user)).toBe(true);
+    expect(tieneAccesoAdmin(Role.ADMIN)).toBe(true);
   });
 
   it('debería denegar el acceso si el usuario es ALUMNO', () => {
-    const user = { rol: 'ALUMNO' };
-    expect(tieneAccesoAdmin(user)).toBe(false);
-  });
-
-  it('debería denegar el acceso si el usuario no tiene rol definido', () => {
-    const user = {};
-    expect(tieneAccesoAdmin(user)).toBe(false);
+    expect(tieneAccesoAdmin(Role.ALUMNO)).toBe(false);
   });
 });

@@ -2,7 +2,7 @@
 
 Plataforma full-stack para la gestión de reservas de recursos, administración de usuarios y control de acceso institucional.
 
-🔗 Demo en vivo: [Tu-Link-De-Vercel.vercel.app]
+🔗 Demo en vivo: (https://sistema-academia-musica.vercel.app/)
 
 ## 🚀 Stack Tecnológico
 - **Frontend/Backend**: Next.js 14+ (App Router)

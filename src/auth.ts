@@ -1,18 +1,15 @@
-import NextAuth, { type DefaultSession } from "next-auth";
+import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
-import { authConfig } from "./auth.config"; //  base liviana
+import { authConfig } from "./auth.config";
+import { Role } from "@prisma/client";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
-  ...authConfig, // Expandir la configuración base
+  ...authConfig,
   providers: [
     Credentials({
       name: "Credentials",
-      credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" },
-      },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
 
@@ -29,6 +26,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
         if (!isValid) return null;
 
+        // IMPORTANTE: Devolvemos exactamente lo que definimos en el .d.ts
         return {
           id: user.id.toString(),
           name: user.nombre,
@@ -40,9 +38,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
   ],
   callbacks: {
-    ...authConfig.callbacks, // callbacks del config
+    ...authConfig.callbacks,
     async jwt({ token, user }) {
       if (user) {
+        //datos en el token cuando el usuario inicia sesión
         token.id = user.id; 
         token.rol = user.rol;
         token.academiaId = user.academiaId;
@@ -51,38 +50,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     },
     async session({ session, token }) {
       if (session.user && token) {
+        // Aquí es donde estaban los errores. Usamos "as" para asegurar el tipo.
         session.user.id = token.id as string;
-        session.user.rol = token.rol as string;
+        session.user.rol = token.rol as Role;
         session.user.academiaId = token.academiaId as number;
       }
       return session;
     },
   },
+// ...
   session: { strategy: "jwt" },
 });
-
-
-declare module "next-auth" {
-  interface Session {
-    user: {
-      id: string;
-      rol?: string;
-      academiaId?: number;
-    } & DefaultSession["user"];
-  }
-
-  interface User {
-    id?: string;
-    rol?: string;
-    academiaId?: number;
-  }
-}
-
-import "next-auth/jwt";
-declare module "next-auth/jwt" {
-  interface JWT {
-    id?: string; 
-    rol?: string;
-    academiaId?: number;
-  }
-}

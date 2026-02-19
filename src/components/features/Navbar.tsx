@@ -53,7 +53,7 @@ export function Navbar({ userName, rol }: NavbarProps) {
         {userName && (
           <Button 
             variant="danger" 
-            // CAMBIO CLAVE: callbackUrl ahora apunta a "/" para volver al landing
+            // callbackUrl ahora apunta a "/" para volver al landing
             onClick={() => signOut({ callbackUrl: "/" })}
           >
             Cerrar Sesión
