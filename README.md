@@ -1,36 +1,35 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Sistema de Gestión - Academia de Música 🎹
 
-## Getting Started
+Plataforma full-stack para la gestión de reservas de recursos, administración de usuarios y control de acceso institucional.
 
-First, run the development server:
+## 🚀 Stack Tecnológico
+- **Frontend/Backend**: Next.js 14+ (App Router)
+- **Base de Datos**: PostgreSQL (Neon)
+- **ORM**: Prisma
+- **Autenticación**: Auth.js (NextAuth) con estrategia JWT
+- **Testing**: Vitest
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## 🧠 Justificación Técnica (Programación 4)
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Arquitectura de Base de Datos
+Se optó por **PostgreSQL** sobre soluciones NoSQL debido a la fuerte naturaleza relacional del dominio. La integridad referencial es crítica para asegurar que las reservas estén siempre vinculadas a recursos y usuarios existentes, garantizando consistencia mediante transacciones ACID.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Optimización y Performance
+- **Connection Pooling**: Se implementó el uso de un Pooler (puerto 6543) para manejar eficientemente las conexiones a la base de datos serverless, evitando el agotamiento de recursos en producción.
+- **Edge Runtime Optimization**: Se realizó una arquitectura de "Auth Config Splitting" para reducir el tamaño del Middleware, cumpliendo con el límite de 1MB de las Edge Functions de Vercel.
+- **Server Components & Actions**: Se minimizó el uso de JavaScript en el cliente delegando la lógica de negocio y mutaciones al servidor.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Seguridad y Autorización
+- Implementación de **RBAC** (Role-Based Access Control) para diferenciar accesos entre Alumnos y Administradores de Academia.
+- Hasheo de contraseñas mediante **BcryptJS**.
+- Middleware de protección de rutas privadas.
 
-## Learn More
+## 🧪 Testing
+El proyecto cuenta con unit tests para validar la lógica crítica de autorización.
+- Comando: `npm test`
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 🛠️ Instalación y Configuración
+1. Clonar el repositorio.
+2. Ejecutar `npm install`.
+3. Configurar las variables de entorno en `.env` (`DATABASE_URL`, `AUTH_SECRET`).
+4. Sincronizar la base de datos: `npx prisma db push`.
