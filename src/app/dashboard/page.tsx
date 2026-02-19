@@ -1,13 +1,14 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
-import { Navbar } from "@/components/ui/Navbar";
-import { DashboardCard } from "@/components/ui/DashboardCard";
+import { Navbar } from "@/components/features/Navbar";
+import { DashboardCard } from "@/components/features/DashboardCard";
 import { Container, DashboardLayout, ActionGroup, FormGroup, Grid } from "@/components/ui/Layouts";
-import { InfoBox } from "@/components/ui/InfoBox";
 import { TextSecondary, TitleSection, TextBold } from "@/components/ui/Typography";
 import { Button } from "@/components/ui/Button";
-import { RecursoCard } from "@/components/ui/RecursoCard";
+import { RecursoCard } from "@/components/features/RecursoCard";
+import { obtenerReservasAcademia } from "@/lib/actions";
+import { ReservaListaAdmin } from "@/components/features/ReservaListaAdmin";
 import Link from "next/link";
 
 export default async function DashboardPage() {
@@ -18,44 +19,50 @@ export default async function DashboardPage() {
   }
 
   const isAdmin = session.user?.rol === "ADMIN";
-  
-  // Obtenemos los IDs de la sesión de forma segura
   const usuarioId = session.user?.id ? Number(session.user.id) : undefined;
-  const academiaId = session.user?.academiaId;
+  const academiaId = Number(session.user?.academiaId);
 
-  const recursos = await prisma.recurso.findMany({
-    where: { academiaId: academiaId },
-    orderBy: { nombre: 'asc' }
-  });
+  const [recursos, reservas] = await Promise.all([
+    prisma.recurso.findMany({
+      where: { academiaId: academiaId },
+      orderBy: { nombre: 'asc' }
+    }),
+    isAdmin ? obtenerReservasAcademia(academiaId) : Promise.resolve([])
+  ]);
 
   return (
     <DashboardLayout>
-      <Navbar userName={session.user?.name} />
+      <Navbar userName={session.user?.name} rol={session.user?.rol} />
 
       <Container>
         <DashboardCard title="Panel de Control">
-          <TextSecondary>
-            Sesión iniciada como: <TextBold>{session.user?.email}</TextBold>
-          </TextSecondary>
+          <FormGroup>
+            <TextSecondary>
+              Sesión iniciada: <TextBold>{session.user?.email}</TextBold>
+            </TextSecondary>
+          </FormGroup>
 
           {isAdmin ? (
-            <InfoBox>
-              Administrador de la Academia
+            <FormGroup>
+              <TextBold>Gestión Institucional</TextBold>
               <ActionGroup>
                 <Link href="/dashboard/recursos/nuevo">
-                  <Button>+ Agregar Nuevo Recurso</Button>
+                  <Button variant="primary">Nuevo Recurso</Button>
                 </Link>
               </ActionGroup>
-            </InfoBox>
+            </FormGroup>
           ) : (
-            <InfoBox>Panel de Alumno</InfoBox>
+            <FormGroup>
+              <TextBold>Portal de Alumno</TextBold>
+              <TextSecondary>Explora los recursos y gestiona tus turnos disponibles.</TextSecondary>
+            </FormGroup>
           )}
 
           <FormGroup>
-            <TitleSection>Recursos de la Academia</TitleSection>
+            <TitleSection>Recursos Disponibles</TitleSection>
             
             {recursos.length === 0 ? (
-              <TextSecondary>No hay recursos registrados todavía.</TextSecondary>
+              <TextSecondary>No se encontraron registros en esta academia actualmente.</TextSecondary>
             ) : (
               <Grid>
                 {recursos.map((recurso) => (
@@ -73,6 +80,21 @@ export default async function DashboardPage() {
               </Grid>
             )}
           </FormGroup>
+
+          {isAdmin && (
+            <FormGroup>
+              <TitleSection>Últimas Reservas</TitleSection>
+              {reservas.length === 0 ? (
+                <TextSecondary>No hay actividad de reservas registrada.</TextSecondary>
+              ) : (
+                /* Aplicamos FormGroup aquí para un espaciado consistente */
+                <FormGroup>
+                  <TextSecondary>Vistazo rápido a los movimientos recientes:</TextSecondary>
+                  <ReservaListaAdmin reservas={reservas.slice(0, 3)} />
+                </FormGroup>
+              )}
+            </FormGroup>
+          )}
 
         </DashboardCard>
       </Container>

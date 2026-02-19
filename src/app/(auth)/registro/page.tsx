@@ -1,10 +1,10 @@
+//registro alumno
 "use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { registrarAlumno } from "@/lib/actions";
-
-import { PageLayout, FormStack, AuthFooter } from "@/components/ui/Layouts";
+import { PageLayout, FormStack, AuthFooter, AuthHeader } from "@/components/ui/Layouts";
 import { AuthContainer } from "@/components/ui/AuthContainer";
 import { AuthLink } from "@/components/ui/AuthLink";
 import { Input } from "@/components/ui/Input";
@@ -33,7 +33,6 @@ export default function RegisterPage() {
         setError(result.error || "Error al registrar usuario.");
       }
     } catch {
-      // Eliminamos 'err' para cumplir con ESLint (Punto 16)
       setError("Ocurrió un error inesperado. Intenta de nuevo.");
     } finally {
       setIsLoading(false);
@@ -43,6 +42,13 @@ export default function RegisterPage() {
   return (
     <PageLayout>
       <AuthContainer title="Crear Cuenta de Alumno">
+        {/* Agregamos el header informativo para dar aire al diseño */}
+        <AuthHeader>
+          <TextSecondary>
+            Ingresa tus datos y el ID proporcionado por tu institución para comenzar.
+          </TextSecondary>
+        </AuthHeader>
+
         <FormStack onSubmit={handleSubmit}>
           <Input 
             label="Nombre Completo"
@@ -79,7 +85,6 @@ export default function RegisterPage() {
             disabled={isLoading}
           />
           
-          {/* Quitamos 'variant="error"' para que coincida con tus Props actuales */}
           {error && <InfoBox>{error}</InfoBox>}
           
           <Button type="submit" isLoading={isLoading}>

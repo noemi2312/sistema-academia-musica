@@ -228,3 +228,19 @@ export async function eliminarReserva(id: number) {
     return { error: "No se pudo cancelar la reserva" };
   }
 }
+
+export async function obtenerReservasAcademia(academiaId: number) {
+  try {
+    return await prisma.reserva.findMany({
+      where: { academiaId: academiaId },
+      include: {
+        recurso: { select: { nombre: true, tipo: true } },
+        usuario: { select: { nombre: true, email: true } }
+      },
+      orderBy: { inicio: 'asc' }
+    });
+  } catch (error) {
+    console.error("Error al obtener reservas de la academia:", error);
+    return [];
+  }
+}

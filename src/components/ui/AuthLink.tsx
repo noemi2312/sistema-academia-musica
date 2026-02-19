@@ -1,5 +1,3 @@
-//estandarizar los enlaces
-
 import Link from "next/link";
 
 export function AuthFooter({ children }: { children: React.ReactNode }) {

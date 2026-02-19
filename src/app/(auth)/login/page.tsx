@@ -1,7 +1,8 @@
 "use client";
 
+import { signIn } from "next-auth/react";
 import { useState } from "react";
-import { registrarAcademiaYAdmin } from "@/lib/actions";
+import { useRouter } from "next/navigation";
 
 import { PageLayout, FormStack, AuthFooter } from "@/components/ui/Layouts";
 import { AuthContainer } from "@/components/ui/AuthContainer";
@@ -11,9 +12,10 @@ import { Button } from "@/components/ui/Button";
 import { InfoBox } from "@/components/ui/InfoBox";
 import { TextSecondary } from "@/components/ui/Typography";
 
-export default function RegisterAdminPage() {
+export default function LoginPage() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -21,49 +23,30 @@ export default function RegisterAdminPage() {
     setError("");
 
     const formData = new FormData(event.currentTarget);
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
 
-    try {
-      // Esta acción crea la Academia y el Admin en una sola transacción
-      const result = await registrarAcademiaYAdmin(formData);
+    const result = await signIn("credentials", {
+      email,
+      password,
+      redirect: false,
+    });
 
-      if (result?.error) {
-        setError(result.error);
-        setIsLoading(false);
-      }
-    } catch {
-      setError("Ocurrió un error inesperado al crear la academia.");
+    if (result?.error) {
+      setError("Credenciales inválidas. Revisa tu email y contraseña.");
       setIsLoading(false);
+    } else {
+      router.push("/dashboard");
+      router.refresh(); 
     }
   }
 
   return (
     <PageLayout>
-      <AuthContainer title="Registrar Mi Academia">
-        <div className="text-center mb-4">
-          <TextSecondary>
-            Crea una cuenta de administrador para gestionar tus recursos y alumnos.
-          </TextSecondary>
-        </div>
-        
+      <AuthContainer title="Iniciar Sesión">
         <FormStack onSubmit={handleSubmit}>
           <Input 
-            label="Nombre de la Academia"
-            name="nombreAcademia" 
-            placeholder="Ej: Academia de Música Mozart"
-            required 
-            disabled={isLoading}
-          />
-
-          <Input 
-            label="Tu Nombre (Admin)"
-            name="nombreAdmin" 
-            placeholder="Ej: Juan Pérez"
-            required 
-            disabled={isLoading}
-          />
-
-          <Input 
-            label="Email Profesional"
+            label="Email"
             name="email" 
             type="email" 
             required 
@@ -81,14 +64,14 @@ export default function RegisterAdminPage() {
           {error && <InfoBox>{error}</InfoBox>}
           
           <Button type="submit" isLoading={isLoading}>
-            Crear Academia y Admin
+            Entrar
           </Button>
         </FormStack>
         
         <AuthFooter>
           <TextSecondary>
-            ¿Eres un alumno con ID?{" "}
-            <AuthLink href="/register">Regístrate como alumno aquí</AuthLink>
+            ¿No tienes una cuenta?{" "}
+            <AuthLink href="/registro">Regístrate aquí</AuthLink>
           </TextSecondary>
         </AuthFooter>
       </AuthContainer>

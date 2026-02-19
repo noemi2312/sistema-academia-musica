@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { TextSecondary, TextBold } from "./Typography";
-import { Button } from "./Button";
-import { ActionGroup } from "./Layouts";
+import { TextSecondary, TextBold } from "@/components/ui/Typography";
+import { Button } from "@/components/ui/Button";
+import { ActionGroup } from "@/components/ui/Layouts";
+import { Card, CardContent } from "@/components/ui/Cards"; // Reutilización de tu UI
 import { ModalConfirmacion } from "./ModalConfirmacion";
 import { ModalEdicion } from "./ModalEdicion";
 import { ModalReserva } from "./ModalReserva"; 
@@ -20,12 +21,23 @@ interface RecursoCardProps {
   academiaId?: number;
 }
 
-export function RecursoCard({ id, nombre, tipo, capacidad, isAdmin = false, usuarioId, academiaId }: RecursoCardProps) {
+export function RecursoCard({ 
+  id, 
+  nombre, 
+  tipo, 
+  capacidad, 
+  isAdmin = false, 
+  usuarioId, 
+  academiaId 
+}: RecursoCardProps) {
   const router = useRouter();
+  
+  // Estados para el control de los modales
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isReservaOpen, setIsReservaOpen] = useState(false);
 
+  // Handlers de acciones de servidor
   const handleEliminar = async () => {
     await eliminarRecurso(id);
     setIsDeleteOpen(false);
@@ -38,18 +50,15 @@ export function RecursoCard({ id, nombre, tipo, capacidad, isAdmin = false, usua
     router.refresh();
   };
 
-  console.log(`Verificando ID para ${nombre}:`, { 
-  usuarioId, 
-  tipo: typeof usuarioId 
-});
-
   return (
-    <div className="p-4 border rounded-lg bg-white shadow-sm">
-      <div className="mb-4">
+    <Card className="flex flex-col justify-between h-full">
+      {/* Información del recurso delegada a la UI */}
+      <CardContent>
         <TextBold>{nombre}</TextBold>
         <TextSecondary>{tipo} — Capacidad: {capacidad}</TextSecondary>
-      </div>
+      </CardContent>
       
+      {/* Acciones según el rol */}
       {isAdmin ? (
         <ActionGroup>
           <Button variant="secondary" onClick={() => setIsEditOpen(true)}>
@@ -60,11 +69,12 @@ export function RecursoCard({ id, nombre, tipo, capacidad, isAdmin = false, usua
           </Button>
         </ActionGroup>
       ) : (
-        <Button className="w-full" onClick={() => setIsReservaOpen(true)}>
+        <Button onClick={() => setIsReservaOpen(true)}>
           Reservar
         </Button>
       )}
 
+      {/* Renderizado condicional de Modales Administrativos */}
       {isAdmin && (
         <>
           <ModalConfirmacion 
@@ -85,7 +95,7 @@ export function RecursoCard({ id, nombre, tipo, capacidad, isAdmin = false, usua
         </>
       )}
 
-      {/* Solo mostramos el modal si tenemos los datos necesarios */}
+      {/* Modal de Reserva para Alumnos */}
       {isReservaOpen && usuarioId && academiaId && (
         <ModalReserva 
           recurso={{ id, nombre }}
@@ -97,6 +107,6 @@ export function RecursoCard({ id, nombre, tipo, capacidad, isAdmin = false, usua
           }}
         />
       )}
-    </div>
+    </Card>
   );
 }
