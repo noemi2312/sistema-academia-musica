@@ -31,7 +31,7 @@ model Usuario {
 model Recurso {
   id         Int      @id @default(autoincrement())
   nombre     String   
-  tipo       String   // "SALA" o "INSTRUMENTO"
+  tipo       String   // "Aula", "cabina" o "INSTRUMENTO"
   capacidad   Int      @default(0)
   academiaId Int
   academia   Academia @relation(fields: [academiaId], references: [id])
@@ -42,10 +42,19 @@ model Reserva {
   id         Int      @id @default(autoincrement())
   inicio     DateTime
   fin        DateTime
+  createdAt  DateTime @default(now()) // Auditoría
+
   usuarioId  Int
   usuario    Usuario  @relation(fields: [usuarioId], references: [id])
+  
   recursoId  Int
   recurso    Recurso  @relation(fields: [recursoId], references: [id])
+  
   academiaId Int
   academia   Academia @relation(fields: [academiaId], references: [id])
+
+  // Índices para velocidad de consulta
+  @@index([recursoId])
+  @@index([usuarioId])
+  @@index([academiaId])
 }

@@ -71,12 +71,19 @@ export default function NuevoRecursoPage() {
               <div className="flex flex-col gap-1">
                 <TextSecondary>Tipo de Recurso</TextSecondary>
                 <select name="tipo" className="input-academia" required>
-                  <option value="SALA">Sala</option>
+                  <option value="CABINA">Cabina</option>
+                  <option value="AULA">Aula</option>
                   <option value="INSTRUMENTO">Instrumento</option>
                 </select>
               </div>
 
               <Input name="capacidad" label="Capacidad Máxima" type="number" min="1" required />
+              {/* Nota de ayuda para el usuario */}
+              <div className="mt-1">
+                <TextSecondary>
+                  Nota: Para instrumentos, se recomienda asignar capacidad 1.
+                </TextSecondary>
+              </div>
             </FormGroup>
             
             <ActionGroup>

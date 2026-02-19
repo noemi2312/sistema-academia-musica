@@ -40,14 +40,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
+        token.id = user.id; 
         token.rol = user.rol;
         token.academiaId = user.academiaId;
       }
       return token;
     },
     async session({ session, token }) {
-      if (session.user) {
-        // Forzamos el tipado aquí para eliminar el error 'unknown'
+      if (session.user && token) {
+        session.user.id = token.id as string;
         session.user.rol = token.rol as string;
         session.user.academiaId = token.academiaId as number;
       }
@@ -60,17 +61,17 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   session: { strategy: "jwt" },
 });
 
-// DECLARACIÓN DE TIPOS AL FINAL (Ambient Types)
-// Esto soluciona el error 2664 de module not found
 declare module "next-auth" {
   interface Session {
     user: {
+      id: string;
       rol?: string;
       academiaId?: number;
     } & DefaultSession["user"];
   }
 
   interface User {
+    id?: string;
     rol?: string;
     academiaId?: number;
   }
@@ -79,6 +80,7 @@ declare module "next-auth" {
 import "next-auth/jwt";
 declare module "next-auth/jwt" {
   interface JWT {
+    id?: string; 
     rol?: string;
     academiaId?: number;
   }

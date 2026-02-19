@@ -35,7 +35,8 @@ export function ModalEdicion({ isOpen, onClose, onConfirm, initialNombre, initia
           <FormGroup>
             <label className="text-sm font-medium">Tipo</label>
             <select className="w-full p-2 border rounded-md" value={tipo} onChange={(e) => setTipo(e.target.value)}>
-              <option value="SALA">Sala</option>
+              <option value="CABINA">Cabina</option>
+              <option value="AULA">Aula</option>
               <option value="INSTRUMENTO">Instrumento</option>
             </select>
           </FormGroup>

@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { TextSecondary, TextBold } from "./Typography"; // Usamos tus tipografías
+import { TextSecondary, TextBold } from "./Typography";
 import { Button } from "./Button";
-import { ActionGroup } from "./Layouts"; // Usamos tu layout para los botones
+import { ActionGroup } from "./Layouts";
 import { ModalConfirmacion } from "./ModalConfirmacion";
 import { ModalEdicion } from "./ModalEdicion";
+import { ModalReserva } from "./ModalReserva"; 
 import { eliminarRecurso, editarRecurso } from "@/lib/actions";
 import { useRouter } from "next/navigation";
 
@@ -15,12 +16,15 @@ interface RecursoCardProps {
   tipo: string;
   capacidad: number;
   isAdmin?: boolean;
+  usuarioId?: number; 
+  academiaId?: number;
 }
 
-export function RecursoCard({ id, nombre, tipo, capacidad, isAdmin = false }: RecursoCardProps) {
+export function RecursoCard({ id, nombre, tipo, capacidad, isAdmin = false, usuarioId, academiaId }: RecursoCardProps) {
   const router = useRouter();
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isReservaOpen, setIsReservaOpen] = useState(false);
 
   const handleEliminar = async () => {
     await eliminarRecurso(id);
@@ -33,6 +37,11 @@ export function RecursoCard({ id, nombre, tipo, capacidad, isAdmin = false }: Re
     setIsEditOpen(false);
     router.refresh();
   };
+
+  console.log(`Verificando ID para ${nombre}:`, { 
+  usuarioId, 
+  tipo: typeof usuarioId 
+});
 
   return (
     <div className="p-4 border rounded-lg bg-white shadow-sm">
@@ -51,7 +60,7 @@ export function RecursoCard({ id, nombre, tipo, capacidad, isAdmin = false }: Re
           </Button>
         </ActionGroup>
       ) : (
-        <Button onClick={() => alert("Próximamente: Formulario de Reserva")}>
+        <Button className="w-full" onClick={() => setIsReservaOpen(true)}>
           Reservar
         </Button>
       )}
@@ -74,6 +83,19 @@ export function RecursoCard({ id, nombre, tipo, capacidad, isAdmin = false }: Re
             initialCapacidad={capacidad} 
           />
         </>
+      )}
+
+      {/* Solo mostramos el modal si tenemos los datos necesarios */}
+      {isReservaOpen && usuarioId && academiaId && (
+        <ModalReserva 
+          recurso={{ id, nombre }}
+          usuarioId={usuarioId}
+          academiaId={academiaId}
+          onClose={() => {
+            setIsReservaOpen(false);
+            router.refresh();
+          }}
+        />
       )}
     </div>
   );
