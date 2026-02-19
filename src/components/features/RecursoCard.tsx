@@ -4,7 +4,6 @@ import { useState } from "react";
 import { TextSecondary, TextBold } from "@/components/ui/Typography";
 import { Button } from "@/components/ui/Button";
 import { ActionGroup } from "@/components/ui/Layouts";
-import { Card, CardContent } from "@/components/ui/Cards"; // Reutilización de tu UI
 import { ModalConfirmacion } from "./ModalConfirmacion";
 import { ModalEdicion } from "./ModalEdicion";
 import { ModalReserva } from "./ModalReserva"; 
@@ -21,23 +20,12 @@ interface RecursoCardProps {
   academiaId?: number;
 }
 
-export function RecursoCard({ 
-  id, 
-  nombre, 
-  tipo, 
-  capacidad, 
-  isAdmin = false, 
-  usuarioId, 
-  academiaId 
-}: RecursoCardProps) {
+export function RecursoCard({ id, nombre, tipo, capacidad, isAdmin = false, usuarioId, academiaId }: RecursoCardProps) {
   const router = useRouter();
-  
-  // Estados para el control de los modales
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isReservaOpen, setIsReservaOpen] = useState(false);
 
-  // Handlers de acciones de servidor
   const handleEliminar = async () => {
     await eliminarRecurso(id);
     setIsDeleteOpen(false);
@@ -45,20 +33,19 @@ export function RecursoCard({
   };
 
   const handleEditar = async (nuevoNombre: string, nuevoTipo: string, nuevaCapacidad: number) => {
+    // Volvemos a la llamada simple con parámetros sueltos
     await editarRecurso(id, nuevoNombre, nuevoTipo, nuevaCapacidad);
     setIsEditOpen(false);
     router.refresh();
   };
 
   return (
-    <Card className="flex flex-col justify-between h-full">
-      {/* Información del recurso delegada a la UI */}
-      <CardContent>
+    <div className="p-4 border rounded-lg bg-white shadow-sm">
+      <div className="mb-4">
         <TextBold>{nombre}</TextBold>
         <TextSecondary>{tipo} — Capacidad: {capacidad}</TextSecondary>
-      </CardContent>
+      </div>
       
-      {/* Acciones según el rol */}
       {isAdmin ? (
         <ActionGroup>
           <Button variant="secondary" onClick={() => setIsEditOpen(true)}>
@@ -69,12 +56,11 @@ export function RecursoCard({
           </Button>
         </ActionGroup>
       ) : (
-        <Button onClick={() => setIsReservaOpen(true)}>
+        <Button className="w-full" onClick={() => setIsReservaOpen(true)}>
           Reservar
         </Button>
       )}
 
-      {/* Renderizado condicional de Modales Administrativos */}
       {isAdmin && (
         <>
           <ModalConfirmacion 
@@ -95,7 +81,6 @@ export function RecursoCard({
         </>
       )}
 
-      {/* Modal de Reserva para Alumnos */}
       {isReservaOpen && usuarioId && academiaId && (
         <ModalReserva 
           recurso={{ id, nombre }}
@@ -107,6 +92,6 @@ export function RecursoCard({
           }}
         />
       )}
-    </Card>
+    </div>
   );
 }

@@ -25,7 +25,7 @@ export default function Home() {
             <Link href="/login">
               <Button variant="primary">Iniciar Sesión</Button>
             </Link>
-            <Link href="/register">
+            <Link href="/registro">
               <Button variant="secondary">Crear Cuenta</Button>
             </Link>
           </FormGroup>
@@ -41,7 +41,7 @@ export default function Home() {
             <Link href="/login">
               <Button variant="primary">Acceso Administración</Button>
             </Link>
-            <Link href="/register/admin">
+            <Link href="/registro/admin">
               <Button variant="secondary">Registrar mi Academia</Button>
             </Link>
           </FormGroup>

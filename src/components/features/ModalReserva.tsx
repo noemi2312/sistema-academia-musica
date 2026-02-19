@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/Input";
 import { InfoBox } from "@/components/ui/InfoBox";
 import { TextSecondary } from "@/components/ui/Typography";
 import { ActionGroup, FormGroup } from "@/components/ui/Layouts";
+import { toast } from "react-hot-toast"; 
 
 interface ModalReservaProps {
   recurso: { id: number; nombre: string };
@@ -32,9 +33,10 @@ export function ModalReserva({ recurso, usuarioId, academiaId, onClose }: ModalR
 
     if (result && "error" in result) {
       setError(result.error);
+      toast.error("No se pudo completar la reserva"); // Feedback rápido
       setIsLoading(false);
     } else {
-      alert("¡Reserva realizada con éxito!");
+      toast.success("¡Reserva realizada con éxito!"); // Reemplaza al alert
       onClose();
     }
   }
@@ -48,7 +50,6 @@ export function ModalReserva({ recurso, usuarioId, academiaId, onClose }: ModalR
       title={`Reservar ${recurso.nombre}`}
     >
       <form onSubmit={handleSubmit}>
-        {/* Agregamos FormGroup para que el texto y los inputs tengan el mismo aire */}
         <FormGroup>
           <TextSecondary>
             Selecciona el rango horario para tu reserva.

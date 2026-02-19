@@ -22,6 +22,7 @@ export default async function DashboardPage() {
   const usuarioId = session.user?.id ? Number(session.user.id) : undefined;
   const academiaId = Number(session.user?.academiaId);
 
+  // Carga de datos en paralelo para optimizar rendimiento
   const [recursos, reservas] = await Promise.all([
     prisma.recurso.findMany({
       where: { academiaId: academiaId },
@@ -29,6 +30,13 @@ export default async function DashboardPage() {
     }),
     isAdmin ? obtenerReservasAcademia(academiaId) : Promise.resolve([])
   ]);
+
+  // Lógica funcional: Agrupar recursos por tipo para mejorar la navegación
+  const tipos = ["AULA", "CABINA", "INSTRUMENTO"];
+  const recursosAgrupados = tipos.map(tipo => ({
+    tipo,
+    items: recursos.filter(r => r.tipo === tipo)
+  })).filter(grupo => grupo.items.length > 0);
 
   return (
     <DashboardLayout>
@@ -64,20 +72,26 @@ export default async function DashboardPage() {
             {recursos.length === 0 ? (
               <TextSecondary>No se encontraron registros en esta academia actualmente.</TextSecondary>
             ) : (
-              <Grid>
-                {recursos.map((recurso) => (
-                  <RecursoCard 
-                    key={recurso.id}
-                    id={recurso.id} 
-                    nombre={recurso.nombre} 
-                    tipo={recurso.tipo} 
-                    capacidad={recurso.capacidad}
-                    isAdmin={isAdmin}
-                    usuarioId={usuarioId}
-                    academiaId={academiaId}
-                  />
-                ))}
-              </Grid>
+              /* Mapeo funcional utilizando tus componentes de estructura */
+              recursosAgrupados.map((grupo) => (
+                <FormGroup key={grupo.tipo}>
+                  <TextBold>{grupo.tipo}S</TextBold>
+                  <Grid>
+                    {grupo.items.map((recurso) => (
+                      <RecursoCard 
+                        key={recurso.id}
+                        id={recurso.id} 
+                        nombre={recurso.nombre} 
+                        tipo={recurso.tipo} 
+                        capacidad={recurso.capacidad}
+                        isAdmin={isAdmin}
+                        usuarioId={usuarioId}
+                        academiaId={academiaId}
+                      />
+                    ))}
+                  </Grid>
+                </FormGroup>
+              ))
             )}
           </FormGroup>
 
@@ -87,7 +101,6 @@ export default async function DashboardPage() {
               {reservas.length === 0 ? (
                 <TextSecondary>No hay actividad de reservas registrada.</TextSecondary>
               ) : (
-                /* Aplicamos FormGroup aquí para un espaciado consistente */
                 <FormGroup>
                   <TextSecondary>Vistazo rápido a los movimientos recientes:</TextSecondary>
                   <ReservaListaAdmin reservas={reservas.slice(0, 3)} />
@@ -95,7 +108,6 @@ export default async function DashboardPage() {
               )}
             </FormGroup>
           )}
-
         </DashboardCard>
       </Container>
     </DashboardLayout>

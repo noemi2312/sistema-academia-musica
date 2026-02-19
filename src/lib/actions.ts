@@ -42,7 +42,6 @@ export async function registrarAcademiaYAdmin(formData: FormData) {
 
 /**
  * REGISTRO: Crea un Alumno y lo vincula a una Academia existente
- * Requisito: Punto 4.2 y 14.7
  */
 export async function registrarAlumno(formData: FormData) {
   const nombre = formData.get("name") as string
@@ -58,7 +57,7 @@ export async function registrarAlumno(formData: FormData) {
         nombre: nombre,
         email: email,
         password: hashedPassword,
-        rol: "USER", // Rol fijo para alumnos
+        rol: "USER",
         academiaId: parseInt(academiaId)
       }
     })
@@ -71,7 +70,6 @@ export async function registrarAlumno(formData: FormData) {
 
 /**
  * RECURSOS: Crear nuevo (Solo Admin)
- * Requisito: Punto 3.1 y 11
  */
 export async function crearRecurso(formData: FormData, academiaId: number) {
   const nombre = formData.get("nombre") as string
@@ -89,18 +87,17 @@ export async function crearRecurso(formData: FormData, academiaId: number) {
         academiaId: academiaId,
       },
     })
+    
+    revalidatePath("/dashboard")
+    return { success: true } // Cambiado para permitir que el Toast se muestre antes de redirigir
   } catch (err) {
     console.error("Error al crear:", err)
     return { error: "No se pudo crear el recurso." }
   }
-
-  revalidatePath("/dashboard")
-  redirect("/dashboard")
 }
 
 /**
  * RECURSOS: Editar existente
- * Requisito: Punto 3.1
  */
 export async function editarRecurso(id: number, nombre: string, tipo: string, capacidad: number) {
   try {
@@ -113,6 +110,7 @@ export async function editarRecurso(id: number, nombre: string, tipo: string, ca
       },
     })
     revalidatePath("/dashboard")
+    return { success: true }
   } catch (err) {
     console.error("Error al editar:", err)
     return { error: "No se pudo actualizar el recurso." }
@@ -121,7 +119,6 @@ export async function editarRecurso(id: number, nombre: string, tipo: string, ca
 
 /**
  * RECURSOS: Eliminar
- * Requisito: Punto 3.1
  */
 export async function eliminarRecurso(id: number) {
   try {
@@ -129,6 +126,7 @@ export async function eliminarRecurso(id: number) {
       where: { id: id },
     })
     revalidatePath("/dashboard")
+    return { success: true }
   } catch (err) {
     console.error("Error al eliminar:", err)
     return { error: "Error al borrar. Puede tener reservas activas." }
@@ -137,7 +135,6 @@ export async function eliminarRecurso(id: number) {
 
 /**
  * RESERVAS: Crear nueva con validación de disponibilidad
- * Requisito: Punto 3.2 y 16.2
  */
 export async function crearReserva(formData: FormData, usuarioId: number, academiaId: number) {
   if (!usuarioId || usuarioId <= 0) {
@@ -147,14 +144,12 @@ export async function crearReserva(formData: FormData, usuarioId: number, academ
   const inicio = new Date(formData.get("inicio") as string);
   const fin = new Date(formData.get("fin") as string);
 
-  // Validación básica de fechas
   if (inicio >= fin) {
     return { error: "La hora de inicio debe ser anterior a la de fin." };
   }
 
   try {
     return await prisma.$transaction(async (tx) => {
-      // 1. Buscamos si hay solapamientos (Choque de horarios)
       const conflicto = await tx.reserva.findFirst({
         where: {
           recursoId,
@@ -173,7 +168,6 @@ export async function crearReserva(formData: FormData, usuarioId: number, academ
         throw new Error("El recurso ya está ocupado en ese horario.");
       }
 
-      // 2. Si no hay conflicto, creamos la reserva
       await tx.reserva.create({
         data: {
           inicio,
@@ -188,11 +182,7 @@ export async function crearReserva(formData: FormData, usuarioId: number, academ
     });
   } catch (err: unknown) {
     console.error("Error en reserva:", err);
-
-    // Validamos el error de forma segura para TypeScript
-    if (err instanceof Error) {
-      return { error: err.message };
-    }
+    if (err instanceof Error) return { error: err.message };
     return { error: "Error al procesar la reserva." };
   } finally {
     revalidatePath("/dashboard");
@@ -204,11 +194,8 @@ export async function obtenerReservasUsuario(usuarioId: number) {
     return await prisma.reserva.findMany({
       where: { usuarioId: usuarioId },
       include: {
-        recurso: {
-          select: { nombre: true, tipo: true }
-        }
+        recurso: { select: { nombre: true, tipo: true } }
       },
-      // Cambiamos 'fechaInicio' por 'inicio'
       orderBy: { inicio: 'desc' } 
     });
   } catch (error) {
@@ -222,6 +209,7 @@ export async function eliminarReserva(id: number) {
     await prisma.reserva.delete({
       where: { id: id },
     });
+    revalidatePath("/dashboard")
     return { success: true };
   } catch (error) {
     console.error("Error al eliminar reserva:", error);

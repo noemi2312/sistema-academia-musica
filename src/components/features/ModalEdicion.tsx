@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { FormGroup, ActionGroup } from "@/components/ui/Layouts";
+import { toast } from "react-hot-toast";
 
 interface ModalEdicionProps {
   isOpen: boolean;
@@ -28,12 +29,21 @@ export function ModalEdicion({
   const [tipo, setTipo] = useState(initialTipo);
   const [capacidad, setCapacidad] = useState(initialCapacidad);
 
-  // Mapeo de opciones para el componente Select
   const opcionesTipo = [
     { value: "CABINA", label: "Cabina" },
     { value: "AULA", label: "Aula" },
     { value: "INSTRUMENTO", label: "Instrumento" },
   ];
+
+  const handleGuardar = () => {
+    try {
+      onConfirm(nombre, tipo, capacidad);
+      toast.success("Cambios guardados correctamente");
+    } catch {
+      // Al omitir el parámetro del catch, evitamos el error de ESLint de variable no usada
+      toast.error("Error al intentar guardar los cambios");
+    }
+  };
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Editar Recurso">
@@ -44,7 +54,6 @@ export function ModalEdicion({
           onChange={(e) => setNombre(e.target.value)} 
         />
         
-        {/* Usamos el componente Select de UI para evitar labels manuales */}
         <Select 
           label="Tipo"
           value={tipo}
@@ -60,12 +69,11 @@ export function ModalEdicion({
         />
       </FormGroup>
 
-      {/* ActionGroup maneja el espaciado de los botones de acción */}
       <ActionGroup>
         <Button variant="secondary" onClick={onClose}>
           Cancelar
         </Button>
-        <Button onClick={() => onConfirm(nombre, tipo, capacidad)}>
+        <Button onClick={handleGuardar}>
           Guardar
         </Button>
       </ActionGroup>

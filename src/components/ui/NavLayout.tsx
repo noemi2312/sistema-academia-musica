@@ -1,10 +1,12 @@
 import React from "react";
 
 export function NavContainer({ children }: { children: React.ReactNode }) {
-  // Centraliza el espaciado y la alineación de la barra superior
   return (
-    <nav className="flex justify-between items-center mb-6">
-      {children}
+    // Agregamos bg-white, border-b y padding para que parezca una Navbar real
+    <nav className="border-b border-gray-100 bg-white py-4 mb-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
+        {children}
+      </div>
     </nav>
   );
 }
