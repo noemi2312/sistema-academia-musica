@@ -29,7 +29,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
         if (!isValid) return null;
 
-        // IMPORTANTE: Devolvemos exactamente lo que definimos en el .d.ts
+      
         return {
           id: user.id.toString(),
           name: user.nombre,
