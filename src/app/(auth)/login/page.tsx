@@ -3,6 +3,7 @@
 import { signIn } from "next-auth/react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 
 // Nombres actualizados para coincidir con Layouts.tsx
 import { DashboardLayout, FormGroup } from "@/components/ui/Layouts";
@@ -14,6 +15,8 @@ import { InfoBox } from "@/components/ui/InfoBox";
 import { TextSecondary } from "@/components/ui/Typography";
 
 export default function LoginPage() {
+  const searchParams = useSearchParams();
+  const roleRequired = searchParams.get("role"); // 'ADMIN' o null
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -30,6 +33,7 @@ export default function LoginPage() {
     const result = await signIn("credentials", {
       email,
       password,
+      role: roleRequired,
       redirect: false,
     });
 

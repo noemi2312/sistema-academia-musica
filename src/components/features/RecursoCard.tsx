@@ -42,13 +42,11 @@ export function RecursoCard({ id, nombre, tipo, capacidad, isAdmin = false, usua
   const handleEditar = async (nuevoNombre: string, nuevoTipo: string, nuevaCapacidad: number) => {
     const resultado = await editarRecurso(id, nuevoNombre, nuevoTipo, nuevaCapacidad);
     
-    // Si hay error, mostramos el toast de error y salimos de la función
     if (resultado?.error) {
       toast.error(resultado.error);
       return; 
     }
 
-    // Solo si el servidor confirmó éxito, mostramos éxito y cerramos el modal
     if (resultado?.success) {
       toast.success("¡Cambios guardados!");
       setIsEditOpen(false);
@@ -63,20 +61,23 @@ export function RecursoCard({ id, nombre, tipo, capacidad, isAdmin = false, usua
         <TextSecondary>{tipo} — Capacidad: {capacidad}</TextSecondary>
       </div>
       
-      {isAdmin ? (
-        <ActionGroup>
-          <Button variant="secondary" onClick={() => setIsEditOpen(true)}>
-            Editar
-          </Button>
-          <Button variant="danger" onClick={() => setIsDeleteOpen(true)}>
-            Borrar
-          </Button>
-        </ActionGroup>
-      ) : (
+      {/* Contenedor flexible para mostrar botones */}
+      <div className="flex flex-col gap-2">
+        {isAdmin && (
+          <ActionGroup>
+            <Button variant="secondary" onClick={() => setIsEditOpen(true)}>
+              Editar
+            </Button>
+            <Button variant="danger" onClick={() => setIsDeleteOpen(true)}>
+              Borrar
+            </Button>
+          </ActionGroup>
+        )}
+        
         <Button className="w-full" onClick={() => setIsReservaOpen(true)}>
           Reservar
         </Button>
-      )}
+      </div>
 
       {isAdmin && (
         <>

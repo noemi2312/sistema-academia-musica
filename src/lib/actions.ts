@@ -5,6 +5,7 @@ import { TipoRecurso } from "@prisma/client"
 import { redirect } from "next/navigation"
 import { revalidatePath } from "next/cache"
 import bcrypt from "bcryptjs"
+import { auth } from "@/auth";
 
 /**
  * REGISTRO: Crea una Academia nueva y su primer Administrador
@@ -85,11 +86,13 @@ export async function registrarAlumno(formData: FormData) {
  * RECURSOS: Crear nuevo (Solo Admin)
  */
 export async function crearRecurso(formData: FormData, academiaId: number) {
+  const session = await auth()
   const nombre = (formData.get("nombre") as string)?.trim()
   const tipoRaw = formData.get("tipo") as string
   const capacidad = parseInt(formData.get("capacidad") as string)
 
   // Validaciones
+  if (!session || session.user.rol !== "ADMIN") {  return { error: "No autorizado." };}
   if (!nombre) return { error: "El nombre es obligatorio." }
   if (!tipoRaw) return { error: "El tipo de recurso es obligatorio." }
   if (isNaN(capacidad) || capacidad < 1) return { error: "La capacidad debe ser al menos 1." }
@@ -103,7 +106,7 @@ export async function crearRecurso(formData: FormData, academiaId: number) {
         nombre: nombre,
         tipo: tipo, 
         capacidad: capacidad,
-        academiaId: academiaId,
+        academiaId:Number(session.user.academiaId), // <--- Blindaje: extraído de la sesión
       },
     })
     
@@ -119,8 +122,10 @@ export async function crearRecurso(formData: FormData, academiaId: number) {
  * RECURSOS: Editar existente
  */
 export async function editarRecurso(id: number, nombre: string, tipo: string, capacidad: number) {
+  const session = await auth();
   const nombreLimpio = nombre?.trim()
 
+  if (!session || session.user.rol !== "ADMIN") { return { error: "No autorizado" }; }
   if (!nombreLimpio) return { error: "El nombre no puede quedar vacío." }
   if (capacidad < 1) return { error: "La capacidad mínima es 1." }
 
@@ -147,6 +152,9 @@ export async function editarRecurso(id: number, nombre: string, tipo: string, ca
  * RECURSOS: Eliminar
  */
 export async function eliminarRecurso(id: number) {
+   const session = await auth();
+
+     if (!session || session.user.rol !== "ADMIN") { return { error: "No autorizado" }; }
   try {
     await prisma.recurso.delete({
       where: { id: id },
@@ -155,7 +163,7 @@ export async function eliminarRecurso(id: number) {
     return { success: true }
   } catch (err) {
     console.error("Error al eliminar:", err)
-    // Gracias al "onDelete: Cascade" que pusimos en el schema, 
+    // Gracias al "onDelete: Cascade" del schema, 
     // las reservas se borrarán solas y no debería dar error aquí.
     return { error: "Error al borrar el recurso." }
   }

@@ -39,7 +39,7 @@ export default function Home() {
               </TextSecondary>
               
               <Button variant="primary">
-                <Link href="/login">Acceso Administración</Link>
+                <Link href="/login?role=ADMIN">Acceso Administración</Link>
               </Button>
 
               <Button variant="secondary">

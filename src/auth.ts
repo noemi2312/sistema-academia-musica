@@ -18,6 +18,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         });
 
         if (!user || !user.password) return null;
+        if (credentials.role === "ADMIN" && user.rol !== "ADMIN") {
+          throw new Error("No tienes permisos de administrador.");
+  }
 
         const isValid = await bcrypt.compare(
           credentials.password as string,
