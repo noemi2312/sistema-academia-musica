@@ -44,7 +44,7 @@ export default function NuevoRecursoPage() {
     }
 
     // 2. Si pasa las validaciones, procedemos a crear
-    const resultado = await crearRecurso(formData, academiaId);
+    const resultado = await crearRecurso(formData);
     
     if (resultado?.error) {
       toast.error(resultado.error);

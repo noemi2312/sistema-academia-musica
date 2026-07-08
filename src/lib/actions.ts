@@ -6,6 +6,7 @@ import { redirect } from "next/navigation"
 import { revalidatePath } from "next/cache"
 import bcrypt from "bcryptjs"
 import { auth } from "@/auth";
+import { CreateServerParamsForMetadata } from "next/dist/server/request/params"
 
 /**
  * REGISTRO: Crea una Academia nueva y su primer Administrador
@@ -85,8 +86,8 @@ export async function registrarAlumno(formData: FormData) {
 /**
  * RECURSOS: Crear nuevo (Solo Admin)
  */
-export async function crearRecurso(formData: FormData, academiaId: number) {
-  const session = await auth()
+export async function crearRecurso(formData: FormData) {
+  const session = await auth();
   const nombre = (formData.get("nombre") as string)?.trim()
   const tipoRaw = formData.get("tipo") as string
   const capacidad = parseInt(formData.get("capacidad") as string)
