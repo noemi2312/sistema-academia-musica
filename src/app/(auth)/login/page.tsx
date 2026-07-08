@@ -1,9 +1,9 @@
 "use client";
 
+import { Suspense } from "react";
 import { signIn } from "next-auth/react";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 // Nombres actualizados para coincidir con Layouts.tsx
 import { DashboardLayout, FormGroup } from "@/components/ui/Layouts";
@@ -14,7 +14,8 @@ import { Button } from "@/components/ui/Button";
 import { InfoBox } from "@/components/ui/InfoBox";
 import { TextSecondary } from "@/components/ui/Typography";
 
-export default function LoginPage() {
+// Este componente contiene la lógica que necesita los parámetros de búsqueda
+function LoginForm() {
   const searchParams = useSearchParams();
   const roleRequired = searchParams.get("role"); // 'ADMIN' o null
   const [error, setError] = useState("");
@@ -42,40 +43,49 @@ export default function LoginPage() {
       setIsLoading(false);
     } else {
       router.push("/dashboard");
-      router.refresh(); 
+      router.refresh();
     }
   }
 
   return (
+    <form onSubmit={handleSubmit} className="w-full space-y-6">
+      <Input
+        label="Email"
+        name="email"
+        type="email"
+        required
+        disabled={isLoading}
+      />
+
+      <Input
+        label="Contraseña"
+        name="password"
+        type="password"
+        required
+        disabled={isLoading}
+      />
+
+      {error && <InfoBox>{error}</InfoBox>}
+
+      <Button type="submit" isLoading={isLoading} className="w-full">
+        Entrar
+      </Button>
+    </form>
+  );
+}
+
+// Esta es la página principal que el servidor prerenderiza
+export default function LoginPage() {
+  return (
     <DashboardLayout>
       <AuthContainer title="Iniciar Sesión">
         <FormGroup>
-          {/* El formulario ahora usa un tag nativo con los estilos del FormGroup */}
-          <form onSubmit={handleSubmit} className="w-full space-y-6">
-            <Input 
-              label="Email"
-              name="email" 
-              type="email" 
-              required 
-              disabled={isLoading}
-            />
-
-            <Input 
-              label="Contraseña"
-              name="password" 
-              type="password" 
-              required 
-              disabled={isLoading}
-            />
-            
-            {error && <InfoBox>{error}</InfoBox>}
-            
-            <Button type="submit" isLoading={isLoading} className="w-full">
-              Entrar
-            </Button>
-          </form>
+          {/* Suspense le dice a Next.js: "No te preocupes por el searchParams ahora, espera a que cargue en el cliente" */}
+          <Suspense fallback={<div className="text-center">Cargando...</div>}>
+            <LoginForm />
+          </Suspense>
         </FormGroup>
-        
+
         <FormGroup>
           <TextSecondary>
             ¿No tienes una cuenta?{" "}
